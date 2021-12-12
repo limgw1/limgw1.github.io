@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h2>Lines Left:</h2>
+  <h1 id="remaining-lines">40</h1>
+  <h2>Pieces placed:</h2>
+  <h2 id="piece-count">0</h2>
+  <h1 id="time">00:000</h1>
+  <!-- Hold Queue -->
+  <h2>Hold</h2>
+  <h1 id="action-text" style="display: none;">Ready?</h1>
+  <canvas id="hold" width="120" height="120"></canvas>
+  <!-- Main Board -->
+  <canvas id="board" width="300" height="600"></canvas>
+  <!-- Piece Preview -->
+  <canvas id="queue" width="120" height="500" style="border:10px solid black"></canvas>
+  <script src="./js/constants.js"></script>
+  <script src="./js/piece.js"></script>
+  <script src="./js/gamemodel.js"></script>
+  <script src="./js/holdmodel.js"></script>
+  <script src="./js/queuemodel.js"></script>
+  <script src="./js/script.js"></script>
+</body>
+</html>
