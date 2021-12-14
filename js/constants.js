@@ -1,4 +1,4 @@
-const GAME_CLOCK = 10 // 1000ms
+// const GAME_CLOCK = 1000/60 // 1000ms
 const PIECE_WIDTH = 30 // This means each "block" in a column or row is 30 px
 const ROWS = 20
 const COLS = 10
