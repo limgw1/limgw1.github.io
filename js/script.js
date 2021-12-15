@@ -61,6 +61,7 @@ let newGameState = () => {
     const rand = gameBag[0]
     currentPiece = new Piece(SHAPES[rand], boardContext)
     currentPiece.index = rand
+    console.log("rendering the first")
     renderGameState()
     //Renders queue board
     let queueArray = []
@@ -71,6 +72,7 @@ let newGameState = () => {
     queue.queueArray = queueArray
     queue.renderQueueState()
   }else{
+    console.log("Rendering the second rendergamestate")
     renderGameState()
   }
   hold.renderHoldState()
@@ -80,6 +82,7 @@ let newGameState = () => {
 //Renders code for Active Game State and falling piece
 let renderGameState = () => {
   //Renders the board
+  currentPiece.checkSpawn()
   for (let i = 0; i < grid.length; i++){
     for (let j = 0; j < grid[i].length; j++){
       let cell = grid[i][j]
@@ -133,6 +136,7 @@ const clearLine = () => {
     }
   }
   if (linesLeft <= 0){
+    renderGameState()
     stage = 2
   }
 }
@@ -170,9 +174,9 @@ let sleep = (ms) => {
 }
 async function startGame(){
   document.getElementById("action-text").style = "display:block"
-  await sleep(1000);
+  await sleep(100);
   document.getElementById("action-text").innerHTML = "GO!"
-  await sleep(1000);
+  await sleep(100);
   stage = 1
   newGameState()
   renderGameState()

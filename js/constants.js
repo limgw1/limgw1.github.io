@@ -6,7 +6,7 @@ const HOLDROWS = 5
 const HOLDCOLS = 4
 const QUEUEROWS = 20
 const QUEUECOLS = 4
-const SCORE_WORTH = 10 // Probably will change this
+const LOCK_DELAY = 500
 
 const SHAPES = [
   //Blank Piece
