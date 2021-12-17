@@ -32,7 +32,7 @@ let internalSavedPiece = null //Stores the Piece model of the holded piece
 let holded = false //Starts off as true because rendering the first piece toggles it to false
 let firstHold = 0
 
-
+//Variables for model
 let hold = new HoldModel(holdContext)
 let queue = new QueueModel(queueContext)
 
@@ -60,6 +60,8 @@ let newGameState = () => {
     restockBag()
     const rand = gameBag[0]
     currentPiece = new Piece(SHAPES[rand], boardContext)
+    currentPiece.settingsDAS = tuning.delayedAutoShift
+    currentPiece.settingsARR = tuning.automaticRepeatRate
     currentPiece.index = rand
     console.log("rendering the first")
     renderGameState()
@@ -185,7 +187,7 @@ async function startGame(){
 }
 
 //Start of code for displaying the timer
-setInterval(() => {
+let timeInterval = setInterval(() => {
   if(stage == 1){
     updateTimer()
   }else if(stage == 2){
@@ -201,20 +203,25 @@ function updateTimer(){
 
 
 document.addEventListener("keydown", (e)=> {
+  console.log(e.key)
   e.preventDefault()
   switch(e.key){
     case controls.rotateClockwise:
       currentPiece.rotateClockwise()
       break
     case controls.moveRight:
-      currentPiece.move(true)
-      break
+      if(!this.ispressedDown){
+        currentPiece.mainMoveFunction(e)
+        break
+      }
     case controls.softDrop:
       currentPiece.moveDown()
       break
     case controls.moveLeft:
-      currentPiece.move(false)
-      break
+      if(!this.ispressedDown){
+        currentPiece.mainMoveFunction(e)
+        break
+      }
     case controls.hardDrop:
       currentPiece.hardDrop()
       break
@@ -229,6 +236,18 @@ document.addEventListener("keydown", (e)=> {
       break
     case controls.restart:
       startGame()
+      break
+  }
+})
+
+document.addEventListener("keyup", (e)=> {
+  e.preventDefault()
+  switch(e.key){
+    case controls.moveLeft:
+      currentPiece.keyupFunc(e)
+      break
+    case controls.moveRight:
+      currentPiece.keyupFunc(e)
       break
   }
 })

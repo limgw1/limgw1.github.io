@@ -5,12 +5,19 @@ class Piece {
     this.y = 0 //TODO: I think need to change this for guideline, pieces spawn at 21/22
     this.x = Math.floor(COLS/2) //TODO: check guideline to see if this is how they make piece spawn in the middle
     this.fromHoldQueue = false
-    this.das = 0;
-    this.arr = 0;
-    this.lockDelay = 0;
     this.index = 0;
+    //Vars for lock delay
     this.landed = false;
+    this.lockDelay = 0;
     this.waitingForLockDelay = false;
+    //For DAS and ARR
+    this.settingsDAS = null
+    this.settingsARR = null
+    this.isPressedDown = false;
+    this.dasCharged = false;
+    this.timeStartofDAS = 0;
+    this.timeStartofARR = 0;
+    this.moveInterval = null;
   }
 
   checkSpawn(x =this.x, y = this.y, candidate=null){
@@ -43,22 +50,69 @@ class Piece {
     })
   }
 
-  move(right){
-    if (right) {
+  mainMoveFunction(e){
+    this.moveInterval = setInterval(() => {this.move(e)},4)
+    if ((e.key == controls.moveLeft || e.key == controls.moveRight) && !this.isPressedDown){
+      this.translate(e)
+      this.timeOfStartDAS = Date.now()
+      this.isPressedDown = true
+      //Had to set it up like that in order to clear it on keyUpFunc
+      this.moveInterval
+    }
+  }
+
+  move(e){
+    if ((e.key == controls.moveLeft || e.key == controls.moveRight) && !this.dasCharged && this.isPressedDown){
+      if (Date.now() - this.timeOfStartDAS >= this.settingsDAS){
+          this.dasCharged = true
+          this.timeOfStartARR = Date.now()
+      }
+      this.isPressedDown = true
+      }else if((e.key == controls.moveLeft || e.key == controls.moveRight) && this.dasCharged && this.isPressedDown){
+        if ((Date.now() - this.timeOfStartARR) >= this.settingsARR){
+              this.translate(e)
+              this.timeOfStartARR = Date.now()
+          }
+      }
+  }
+
+  keyupFunc(e){
+    if((e.key == controls.moveLeft || e.key == controls.moveRight) && this.isPressedDown){
+        console.log("Keyup")
+        this.isPressedDown = false
+        this.dasCharged = false
+        this.timeOfStartDAS = 0
+        this.timeOfStartARR = 0
+        this.moveInterval = null
+        for(i=0;i<999;i++){
+          if (i !== timeInterval){
+            clearInterval(i)
+          }
+        }
+    }else{
+        console.log("error")
+    }
+  }
+
+  translate(e){
+    if (e.key == "ArrowRight") {
       //move right
       if (!this.collision(this.x+1,this.y)){
         this.x += 1
         this.landed = false
         this.waitingForLockDelay = false
       }
-    }else if (!this.collision(this.x-1, this.y)) {
+    }else if (e.key == "ArrowLeft"){
       //move left
       if (!this.collision(this.x-1, this.y)){
         this.x -= 1
         this.landed = false
         this.waitingForLockDelay = false
       }
+    }else{
+      console.log("Error")
     }
+
     renderGameState()
     this.lockDelayTest(this.x, this.y)
   }
@@ -79,8 +133,6 @@ class Piece {
             if (grid[q][p] > 0){
               return true
             }
-            //TODO: If any piece ccw and touches another non-blank square, return true
-            //TODO: If any piece cw and touches another non-blank square, return true
           }
           else{
             return true
@@ -193,12 +245,10 @@ class Piece {
           let q = y + i + 1 //This is the up down direction
           if (p >= 0 && p < COLS && q < ROWS){
             if (grid[q][p] > 0){
-              console.log("gridqp>0")
               this.landed = true
               break loop1;
             }
           }else if(q >= ROWS){
-            console.log("q>=rows")
             this.landed = true
             break loop1;
           }else{
@@ -208,7 +258,6 @@ class Piece {
         }
       }
     }
-    console.log(this.landed)
     if (this.landed && !this.waitingForLockDelay){
       this.lockDelayCountdown()
       this.waitingForLockDelay = true
