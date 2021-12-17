@@ -18,7 +18,7 @@ let grid = []
 let stage = 0 //Stage 0 for unrendered game, Stage 1 for active game, Stage 2 for finished game, Stage 3 for paused game
 
 //Variables for the display
-let linesLeft = 20
+let linesLeft = 4
 let rawTimer = 0
 let pieceCount = 0
 
@@ -82,7 +82,9 @@ let newGameState = () => {
 //Renders code for Active Game State and falling piece
 let renderGameState = () => {
   //Renders the board
-  currentPiece.checkSpawn()
+  if (!linesLeft <= 0){
+    currentPiece.checkSpawn()
+  }
   for (let i = 0; i < grid.length; i++){
     for (let j = 0; j < grid[i].length; j++){
       let cell = grid[i][j]
@@ -136,8 +138,8 @@ const clearLine = () => {
     }
   }
   if (linesLeft <= 0){
-    renderGameState()
     stage = 2
+    renderGameState()
   }
 }
 //End of code
