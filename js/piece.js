@@ -32,6 +32,7 @@ class Piece {
           if (grid[i][j] > 0){
             alert("Game over!")
             stage = 0
+            endGame()
             break
           }
         }
@@ -228,7 +229,7 @@ class Piece {
     currentPiece = null
     holded = false
     pieceCount ++
-    document.getElementById("piece-count").innerHTML = "Piece: " +pieceCount
+    document.getElementById("piece-count").textContent = "Piece: " +pieceCount
     newGameState()
   }
 
@@ -309,7 +310,7 @@ class Piece {
       }
       currentPiece = null
       pieceCount ++
-      document.getElementById("piece-count").innerHTML = "Piece: " +pieceCount
+      document.getElementById("piece-count").textContent = "Piece: " +pieceCount
       newGameState()
     }
   }

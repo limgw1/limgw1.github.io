@@ -130,7 +130,7 @@ const clearLine = () => {
       }
     }
     linesLeft --
-    document.getElementById("remaining-lines").innerHTML = "Lines left: "+ linesLeft
+    document.getElementById("remaining-lines").textContent = "Lines left: "+ linesLeft
     return true
   }
   for (let i = 0; i < grid.length; i++){
@@ -177,10 +177,11 @@ let sleep = (ms) => {
   return new Promise(resolve=>setTimeout(resolve,ms))
 }
 async function startGame(){
-  document.getElementById("action-text").style = "display:block"
-  await sleep(100);
-  document.getElementById("action-text").innerHTML = "GO!"
-  await sleep(100);
+  endGame()
+  document.getElementById("action-text").textContent = "Ready?"
+  await sleep(500);
+  document.getElementById("action-text").textContent = "GO!"
+  await sleep(500);
   stage = 1
   newGameState()
   renderGameState()
@@ -192,12 +193,13 @@ let timeInterval = setInterval(() => {
     updateTimer()
   }else if(stage == 2){
     alert("Game over, final time is: " + rawTimer/100)
-    stage = 0
+    endGame()
   }
 }, 10);
+
 function updateTimer(){
   rawTimer ++
-  document.getElementById("time").innerHTML = "Time: "+(rawTimer/100)
+  document.getElementById("time").textContent = "Time: "+(rawTimer/100).toFixed(2)
 }
 //End of code
 
@@ -254,5 +256,20 @@ document.addEventListener("keyup", (e)=> {
 
 grid = makeStartingGrid()
 
-
+function endGame(){
+  stage = 0;
+  boardContext.clearRect(0,0, ROWS*PIECE_WIDTH, COLS*PIECE_WIDTH)
+  queueContext.clearRect(0,0, QUEUEROWS*PIECE_WIDTH, QUEUECOLS*PIECE_WIDTH)
+  holdContext.clearRect(0,0, HOLDROWS*PIECE_WIDTH, HOLDCOLS*PIECE_WIDTH)
+  linesLeft = 4
+  rawTimer = 0
+  pieceCount = 0
+  grid = makeStartingGrid()
+  savedPiece = null
+  internalSavedPiece = null
+  holded = false
+  firstHold = 0
+  gameBag = []
+  currentPiece = null
+}
 

@@ -1,0 +1,36 @@
+body{
+  background-color: black;
+  color: white;
+}
+
+
+#full-board{
+  display:inline-block;
+  width:50%;
+  text-align: center;
+}
+
+canvas{
+  vertical-align: top;
+}
+
+.main-board{
+  padding: 50px;
+  width: 100%;
+  justify-content: center;
+}
+
+
+#queue{
+  padding-left: 50px;
+  padding-top: 30px;
+}
+
+#hold{
+  padding-right: 50px;
+}
+
+#board{
+  border-color: grey;
+  border-style: solid;
+}

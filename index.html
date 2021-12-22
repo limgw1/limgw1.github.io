@@ -1,23 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="style.css">
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
 </head>
 <body>
-  <h1 id="remaining-lines">Lines Left: </h1>
-  <h2 id="piece-count">Piece: </h2>
-  <h1 id="time">00:00</h1>
   <!-- Hold Queue -->
-  <h2>Hold</h2>
-  <h1 id="action-text" style="display: none;">Ready?</h1>
-  <canvas id="hold" width="120" height="120"></canvas>
-  <!-- Main Board -->
-  <canvas id="board" width="300" height="600"></canvas>
-  <!-- Piece Preview -->
-  <canvas id="queue" width="120" height="500" style="border:10px solid black"></canvas>
+  <div id="full-board">
+    <div id="player">
+      <div class="main-board">
+        <canvas id="hold" width="120" height="120"></canvas>
+        <!-- Main Board -->
+        <canvas id="board" width="300" height="600"></canvas>
+        <!-- Piece Preview -->
+        <canvas id="queue" width="120" height="500"></canvas>
+      </div>
+      <div class="stats">
+        <h1 id="action-text">Press R to start.</h1>
+        <h1 id="time">Time: 0:00</h1>
+        <h1 id="remaining-lines">Lines Left: 40</h1>
+        <h2 id="piece-count">Piece: 0</h2>
+      </div>
+    </div>
+  </div>
   <script src="./js/constants.js"></script>
   <script src="./js/settings.js"></script>
   <script src="./js/piece.js"></script>
