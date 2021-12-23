@@ -63,7 +63,6 @@ let newGameState = () => {
     currentPiece.settingsDAS = tuning.delayedAutoShift
     currentPiece.settingsARR = tuning.automaticRepeatRate
     currentPiece.index = rand
-    console.log("rendering the first")
     renderGameState()
     //Renders queue board
     let queueArray = []
@@ -74,7 +73,6 @@ let newGameState = () => {
     queue.queueArray = queueArray
     queue.renderQueueState()
   }else{
-    console.log("Rendering the second rendergamestate")
     renderGameState()
   }
   hold.renderHoldState()
@@ -205,7 +203,6 @@ function updateTimer(){
 
 
 document.addEventListener("keydown", (e)=> {
-  console.log(e.key)
   e.preventDefault()
   switch(e.key){
     case controls.rotateClockwise:
@@ -217,6 +214,7 @@ document.addEventListener("keydown", (e)=> {
         break
       }
     case controls.softDrop:
+      console.log(currentPiece.shape)
       currentPiece.moveDown()
       break
     case controls.moveLeft:
@@ -225,6 +223,7 @@ document.addEventListener("keydown", (e)=> {
         break
       }
     case controls.hardDrop:
+      console.log("Pressed hard drop")
       currentPiece.hardDrop()
       break
     case controls.rotateCounterclockwise:
@@ -261,15 +260,16 @@ function endGame(){
   boardContext.clearRect(0,0, ROWS*PIECE_WIDTH, COLS*PIECE_WIDTH)
   queueContext.clearRect(0,0, QUEUEROWS*PIECE_WIDTH, QUEUECOLS*PIECE_WIDTH)
   holdContext.clearRect(0,0, HOLDROWS*PIECE_WIDTH, HOLDCOLS*PIECE_WIDTH)
-  linesLeft = 4
-  rawTimer = 0
-  pieceCount = 0
-  grid = makeStartingGrid()
   savedPiece = null
   internalSavedPiece = null
+  hold = new HoldModel(holdContext)
   holded = false
   firstHold = 0
   gameBag = []
   currentPiece = null
+  linesLeft = 4
+  rawTimer = 0
+  pieceCount = 0
+  grid = makeStartingGrid()
 }
 

@@ -79,7 +79,6 @@ class Piece {
 
   keyupFunc(e){
     if((e.key == controls.moveLeft || e.key == controls.moveRight) && this.isPressedDown){
-        console.log("Keyup")
         this.isPressedDown = false
         this.dasCharged = false
         this.timeOfStartDAS = 0
@@ -195,15 +194,14 @@ class Piece {
       this.y += 1
 
     }
-    // this.lockDelayTest(this.x, this.y)
     newGameState()
   }
 
   hardDrop(){
-  //Take current piece
-  //Check how many blocks down it can go before it hits another piece
-  //Go down that many pieces
-  //Immediately render game state
+    //CHANGE THIS CODE IF THERE IS ANOTHER TIMEOUT IN THE FUTURE
+    for(i=0;i<999;i++){
+      clearTimeout(i)
+    }
     const shape = this.shape
     let x = this.x
     let y = this.y
@@ -308,6 +306,7 @@ class Piece {
         alert("Game over!")
         stage = 0
       }
+      console.log("Turning piece null")
       currentPiece = null
       pieceCount ++
       document.getElementById("piece-count").textContent = "Piece: " +pieceCount
