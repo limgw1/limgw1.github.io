@@ -200,7 +200,9 @@ class Piece {
   hardDrop(){
     //CHANGE THIS CODE IF THERE IS ANOTHER TIMEOUT IN THE FUTURE
     for(i=0;i<999;i++){
-      clearTimeout(i)
+      if (i !== this.moveInterval && i !== timeInterval){
+        clearTimeout(i)
+      }
     }
     const shape = this.shape
     let x = this.x

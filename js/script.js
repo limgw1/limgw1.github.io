@@ -36,10 +36,6 @@ let firstHold = 0
 let hold = new HoldModel(holdContext)
 let queue = new QueueModel(queueContext)
 
-// setInterval(() => {
-//   renderGameState()
-// }, 10);
-
 //Code for creating the main board grid
 let makeStartingGrid = () => {
   let grid = []

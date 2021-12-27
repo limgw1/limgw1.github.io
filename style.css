@@ -1,25 +1,19 @@
 body{
+  display: inline;
   background-color: black;
   color: white;
 }
 
 
-#full-board{
-  display:inline-block;
-  width:50%;
+.player{
+  padding: 50px;
+  width: 50%;
   text-align: center;
 }
 
 canvas{
   vertical-align: top;
 }
-
-.main-board{
-  padding: 50px;
-  width: 100%;
-  justify-content: center;
-}
-
 
 #queue{
   padding-left: 50px;
