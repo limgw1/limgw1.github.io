@@ -58,6 +58,7 @@ let newGameState = () => {
     currentPiece = new Piece(SHAPES[rand], boardContext)
     currentPiece.settingsDAS = tuning.delayedAutoShift
     currentPiece.settingsARR = tuning.automaticRepeatRate
+    currentPiece.settingsSDRR = tuning.softDropRepeatRate
     currentPiece.index = rand
     renderGameState()
     //Renders queue board
@@ -210,9 +211,10 @@ document.addEventListener("keydown", (e)=> {
         break
       }
     case controls.softDrop:
-      console.log(currentPiece.shape)
-      currentPiece.moveDown()
-      break
+      if(!this.ispressedDown){
+        currentPiece.mainSoftDropFunction(e)
+        break
+      }
     case controls.moveLeft:
       if(!this.ispressedDown){
         currentPiece.mainMoveFunction(e)
@@ -244,6 +246,9 @@ document.addEventListener("keyup", (e)=> {
       currentPiece.keyupFunc(e)
       break
     case controls.moveRight:
+      currentPiece.keyupFunc(e)
+      break
+    case controls.softDrop:
       currentPiece.keyupFunc(e)
       break
   }

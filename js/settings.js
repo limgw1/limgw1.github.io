@@ -13,7 +13,7 @@ let controls = {
 let tuning = {
   delayedAutoShift: 100,
   automaticRepeatRate: 0,
-  softDrop: 0,
+  softDropRepeatRate: 0,
 }
 
 
@@ -28,6 +28,11 @@ function changeTuning(){
   if (0 <= newArr <= 100){
     tuning.automaticRepeatRate = newArr
     document.getElementById("arr-tuning").textContent = "ARR : "+tuning.automaticRepeatRate
+  }
+  newSdrr = window.prompt("Enter your soft drop repeat rate in millisecond (0-100)")
+  if (0 <= newSdrr <= 100){
+    tuning.softDropRepeatRate = newSdrr
+    document.getElementById("sdrr-tuning").textContent = "SDRR : "+tuning.softDropRepeatRate
   }
 }
 

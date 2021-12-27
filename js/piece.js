@@ -13,11 +13,15 @@ class Piece {
     //For DAS and ARR
     this.settingsDAS = null
     this.settingsARR = null
+    this.settingsSDRR = null
     this.isPressedDown = false;
     this.dasCharged = false;
     this.timeStartofDAS = 0;
     this.timeStartofARR = 0;
+    this.timeStartofSDRR = 0;
     this.moveInterval = null;
+    this.softDropInterval = null;
+    this.lockDelayTimeout = null;
   }
 
   checkSpawn(x =this.x, y = this.y, candidate=null){
@@ -55,52 +59,87 @@ class Piece {
     this.moveInterval = setInterval(() => {this.move(e)},4)
     if ((e.key == controls.moveLeft || e.key == controls.moveRight) && !this.isPressedDown){
       this.translate(e)
-      this.timeOfStartDAS = Date.now()
+      this.timeStartOfDAS = Date.now()
       this.isPressedDown = true
       //Had to set it up like that in order to clear it on keyUpFunc
       this.moveInterval
     }
   }
 
+  mainSoftDropFunction(e){
+    this.softDropInterval = setInterval(() => {
+      if (this.isPressedDown){
+        this.moveDown()
+      }
+    },4)
+    if (e.key == controls.softDrop){
+      this.moveDown()
+      this.timeStartOfSDRR = Date.now()
+      this.isPressedDown = true
+      this.softDropInterval()
+    }
+  }
+
   move(e){
     if ((e.key == controls.moveLeft || e.key == controls.moveRight) && !this.dasCharged && this.isPressedDown){
-      if (Date.now() - this.timeOfStartDAS >= this.settingsDAS){
+      if (Date.now() - this.timeStartOfDAS >= this.settingsDAS){
           this.dasCharged = true
-          this.timeOfStartARR = Date.now()
+          this.timeStartOfARR = Date.now()
       }
       this.isPressedDown = true
       }else if((e.key == controls.moveLeft || e.key == controls.moveRight) && this.dasCharged && this.isPressedDown){
-        if ((Date.now() - this.timeOfStartARR) >= this.settingsARR){
+        if ((Date.now() - this.timeStartOfARR) >= this.settingsARR){
               this.translate(e)
-              this.timeOfStartARR = Date.now()
+              this.timeStartOfARR = Date.now()
           }
       }
   }
 
   keyupFunc(e){
-    if((e.key == controls.moveLeft || e.key == controls.moveRight) && this.isPressedDown){
-        this.isPressedDown = false
-        this.dasCharged = false
-        this.timeOfStartDAS = 0
-        this.timeOfStartARR = 0
-        this.moveInterval = null
-        for(i=0;i<999;i++){
-          if (i !== timeInterval){
-            clearInterval(i)
-          }
+    if((e.key == controls.moveLeft || e.key == controls.moveRight || e.key == controls.softDrop) && this.isPressedDown){
+      for(i=0;i<9999;i++){
+        if (i !== timeInterval && i !== this.lockDelayTimeout){
+          clearInterval(i)
         }
+      }
+      this.isPressedDown = false
+      this.dasCharged = false
+      this.timeStartOfDAS = 0
+      this.timeStartOfARR = 0
+      this.timeStartOfSDRR = 0
+      this.moveInterval = null
+      this.softDropInterval = null
+      this.lockDelayTimeout = null
     }else{
-        console.log("error")
+        console.log("keyupfunc error")
     }
   }
 
   translate(e){
-    if (e.key == "ArrowRight") {
+    if (e.key == "ArrowRight" && this.settingsARR == 0 && this.dasCharged) {
+      //move all the way right
+      while(!this.collision(this.x+1, this.y)){
+        if (this.collision(this.x+1, this.y)){
+        }else{
+          this.x += 1
+        }
+      }
+    }else if (e.key == "ArrowLeft" && this.settingsARR == 0 && this.dasCharged){
+      //move all the way left
+      while(!this.collision(this.x-1, this.y)){
+        if (this.collision(this.x-1, this.y)){
+        }else{
+          this.x -= 1
+        }
+      }
+    }else if (e.key == "ArrowRight") {
       //move right
       if (!this.collision(this.x+1,this.y)){
         this.x += 1
         this.landed = false
         this.waitingForLockDelay = false
+      }else if(this.collision(this.x+1,this.y)){
+        this.lockDelayTest()
       }
     }else if (e.key == "ArrowLeft"){
       //move left
@@ -108,11 +147,12 @@ class Piece {
         this.x -= 1
         this.landed = false
         this.waitingForLockDelay = false
+      }else if(this.collision(this.x-1,this.y)){
+        this.lockDelayTest()
       }
     }else{
-      console.log("Error")
+      console.log("Errors")
     }
-
     renderGameState()
     this.lockDelayTest(this.x, this.y)
   }
@@ -189,10 +229,25 @@ class Piece {
   }
 
   moveDown(){
-    if (this.collision(this.x, this.y+1)){
+    if (tuning.softDropRepeatRate == 0){
+      while(!this.collision(this.x, this.y+1)){
+        if (this.collision(this.x, this.y+1)){
+        break
+        }else{
+          this.y += 1
+        }
+      }
     }else{
-      this.y += 1
-
+      if (this.timeStartofSDRR == 0){
+        this.timeStartofSDRR = Date.now()
+      }
+      if (Date.now() - this.timeStartofSDRR >= this.settingsSDRR){
+        if (this.collision(this.x, this.y+1)){
+        }else{
+          this.y += 1
+        }
+        this.timeStartofSDRR = 0
+      }
     }
     newGameState()
   }
@@ -200,7 +255,7 @@ class Piece {
   hardDrop(){
     //CHANGE THIS CODE IF THERE IS ANOTHER TIMEOUT IN THE FUTURE
     for(i=0;i<999;i++){
-      if (i !== this.moveInterval && i !== timeInterval){
+      if (i !== this.moveInterval && i !== timeInterval && i !== this.softDropInterval){
         clearTimeout(i)
       }
     }
@@ -246,10 +301,12 @@ class Piece {
           let q = y + i + 1 //This is the up down direction
           if (p >= 0 && p < COLS && q < ROWS){
             if (grid[q][p] > 0){
+              console.log("landed 1")
               this.landed = true
               break loop1;
             }
           }else if(q >= ROWS){
+            console.log("landed 2")
             this.landed = true
             break loop1;
           }else{
@@ -260,6 +317,7 @@ class Piece {
       }
     }
     if (this.landed && !this.waitingForLockDelay){
+      console.log("lockdelaycountdown initiated")
       this.lockDelayCountdown()
       this.waitingForLockDelay = true
     }
@@ -267,27 +325,15 @@ class Piece {
   }
 
   lockDelayCountdown(){
-    setTimeout(() => {
+    console.log("Countdown initiated")
+    this.lockDelayTimeout = setTimeout(() => {
       if(this.landed == true){
         this.lockPiece()
+        console.log("lockdelay false 2")
         this.waitingForLockDelay = false
       }
     },LOCK_DELAY)
   }
-
-  // lockDelayCountdown(){
-  //   let lockdelayTimeReached = false
-  //   let a = Date.now()
-  //   let b = 0
-  //   while(!lockdelayTimeReached && (this.landed == true)){
-  //     b = Date.now()
-  //     if ((b-a) < LOCK_DELAY){
-  //       lockdelayTimeReached = false
-  //     }else{
-  //       lockdelayTimeReached = true
-  //     }
-  //     }
-  //   }
 
   lockPiece(){
     if (this.landed == true){
@@ -308,7 +354,6 @@ class Piece {
         alert("Game over!")
         stage = 0
       }
-      console.log("Turning piece null")
       currentPiece = null
       pieceCount ++
       document.getElementById("piece-count").textContent = "Piece: " +pieceCount
