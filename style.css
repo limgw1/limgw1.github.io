@@ -1,18 +1,60 @@
 body{
+  font-family: Arial, Helvetica, sans-serif;
   display: inline;
   background-color: black;
   color: white;
 }
 
+canvas{
+  vertical-align: top;
+}
+
+.button{
+  background: #3d43b4;
+  padding: 1em 2em;
+  color: white;
+}
+
+/* .button:hover{
+  background: blue;
+} */
+
+.modal{
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content{
+  background-color: #333333;
+  margin: 10% auto;
+  padding: 2%;
+  width: 40%
+}
+
+/* Floats the X button to the right */
+.close-button{
+  float: right;
+  font-size: 45px;
+}
+
+/* Change X button to pointer on hover to help show it can be clicked  */
+.close-button:hover,.close-button:focus{
+  color: #888888;
+  text-decoration: none;
+  cursor: pointer;
+}
 
 .player{
   padding: 50px;
   width: 50%;
   text-align: center;
-}
-
-canvas{
-  vertical-align: top;
 }
 
 #queue{

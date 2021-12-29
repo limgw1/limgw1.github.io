@@ -116,7 +116,7 @@ class Piece {
   }
 
   translate(e){
-    if (e.key == "ArrowRight" && this.settingsARR == 0 && this.dasCharged) {
+    if (e.key == controls.moveRight && this.settingsARR == 0 && this.dasCharged) {
       //move all the way right
       while(!this.collision(this.x+1, this.y)){
         if (this.collision(this.x+1, this.y)){
@@ -124,7 +124,7 @@ class Piece {
           this.x += 1
         }
       }
-    }else if (e.key == "ArrowLeft" && this.settingsARR == 0 && this.dasCharged){
+    }else if (e.key == controls.moveLeft && this.settingsARR == 0 && this.dasCharged){
       //move all the way left
       while(!this.collision(this.x-1, this.y)){
         if (this.collision(this.x-1, this.y)){
@@ -132,7 +132,7 @@ class Piece {
           this.x -= 1
         }
       }
-    }else if (e.key == "ArrowRight") {
+    }else if (e.key == controls.moveRight) {
       //move right
       if (!this.collision(this.x+1,this.y)){
         this.x += 1
@@ -141,7 +141,7 @@ class Piece {
       }else if(this.collision(this.x+1,this.y)){
         this.lockDelayTest()
       }
-    }else if (e.key == "ArrowLeft"){
+    }else if (e.key == controls.moveLeft){
       //move left
       if (!this.collision(this.x-1, this.y)){
         this.x -= 1

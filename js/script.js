@@ -15,7 +15,7 @@ holdContext.scale(PIECE_WIDTH, PIECE_WIDTH)
 
 //Variables for the board
 let grid = []
-let stage = 0 //Stage 0 for unrendered game, Stage 1 for active game, Stage 2 for finished game, Stage 3 for paused game
+let stage = 0 //Stage 0 for unrendered game, Stage 1 for active game, Stage 2 for finished game, Stage 3 for paused game, Stage 4 for controls
 
 //Variables for the display
 let linesLeft = 4
@@ -217,11 +217,11 @@ document.addEventListener("keydown", (e)=> {
       }
     case controls.moveLeft:
       if(!this.ispressedDown){
+        console.log("Moving left")
         currentPiece.mainMoveFunction(e)
         break
       }
     case controls.hardDrop:
-      console.log("Pressed hard drop")
       currentPiece.hardDrop()
       break
     case controls.rotateCounterclockwise:
@@ -254,8 +254,6 @@ document.addEventListener("keyup", (e)=> {
   }
 })
 
-grid = makeStartingGrid()
-
 function endGame(){
   stage = 0;
   boardContext.clearRect(0,0, ROWS*PIECE_WIDTH, COLS*PIECE_WIDTH)
@@ -273,4 +271,7 @@ function endGame(){
   pieceCount = 0
   grid = makeStartingGrid()
 }
+
+grid = makeStartingGrid()
+loadControls()
 

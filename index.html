@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="https://limgw1.github.io/style.css">
+  <link rel="stylesheet" href="style.css">
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,7 +28,19 @@
     <h1 id="das-tuning">DAS : 100</h1>
     <h1 id="arr-tuning">ARR : 0</h1>
     <h1 id="sdrr-tuning">SDRR : 0</h1>
-    <button id="tuning-change" onclick="changeTuning()">Change Tuning</button>
+    <button id="tuning-change" class="button" onclick="changeTuning()">Change Tuning</button>
+  </div>
+  <div class="controls">
+    <h1>Current Controls:</h1>
+    <ul id="control-list"></ul>
+    <button id="change-controls" class="button" onclick="openControlsModal()">Change Controls</button>
+    <div id="change-controls-modal" class="modal">
+      <div id="controls-content" class="modal-content">
+        <p id="actual-control-label"></p>
+        <p id="actual-control-input"></p>
+        <button id="save-and-close-modal" class="button" onclick="saveAndCloseControlsModal()">Save and close</button>
+      </div>
+    </div>
   </div>
   <script src="./js/constants.js"></script>
   <script src="./js/settings.js"></script>
