@@ -200,7 +200,7 @@ function updateTimer(){
 
 
 document.addEventListener("keydown", (e)=> {
-  if (stage == 0){
+  if (stage == 0 || stage == 1){
     e.preventDefault()
     switch(e.key){
       case controls.rotateClockwise:
