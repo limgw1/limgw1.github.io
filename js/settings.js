@@ -16,34 +16,25 @@ let tuning = {
   softDropRepeatRate: 0,
 }
 
-
-function changeTuning(){
-  //Dont need to implement new stage I think because eventually you wont be able to change tuning midgame
-  newDas = window.prompt("Enter your DAS in millisecond (10-1000)")
-  if (10 <= newDas <= 1000){
-    tuning.delayedAutoShift = newDas
-    document.getElementById("das-tuning").textContent = "DAS : "+tuning.delayedAutoShift
-  }
-  newArr = window.prompt("Enter your ARR in millisecond (0-100)")
-  if (0 <= newArr <= 100){
-    tuning.automaticRepeatRate = newArr
-    document.getElementById("arr-tuning").textContent = "ARR : "+tuning.automaticRepeatRate
-  }
-  newSdrr = window.prompt("Enter your soft drop repeat rate in millisecond (0-100)")
-  if (0 <= newSdrr <= 100){
-    tuning.softDropRepeatRate = newSdrr
-    document.getElementById("sdrr-tuning").textContent = "SDRR : "+tuning.softDropRepeatRate
-  }
-}
-
 function loadControls(){
-  listOfKeys = Object.keys(controls)
-  listOfValues = Object.values(controls)
+  let listOfKeys = Object.keys(controls)
+  let listOfValues = Object.values(controls)
   for(i=0; i<listOfKeys.length; i++){
     node = document.createElement("li")
     textNode = document.createTextNode(listOfKeys[i]+" : "+listOfValues[i])
     node.appendChild(textNode)
     document.getElementById("control-list").appendChild(node)
+  }
+}
+
+function loadTuning(){
+  let listOfKeys = Object.keys(tuning)
+  let listOfValues = Object.values(tuning)
+  for(i=0; i<listOfKeys.length; i++){
+    node = document.createElement("li")
+    textNode = document.createTextNode(listOfKeys[i]+" : "+listOfValues[i])
+    node.appendChild(textNode)
+    document.getElementById("tuning-list").appendChild(node)
   }
 }
 
@@ -53,11 +44,17 @@ function openControlsModal(){
   modal.style.display = "block"
 }
 
+function openTuningModal(){
+  renderTuning()
+  modal = document.getElementById("change-tuning-modal")
+  modal.style.display = "block"
+}
+
 function saveAndCloseControlsModal(){
   stage = 0
-  console.log("Solmi cute")
   modal = document.getElementById("change-controls-modal")
   modal.style.display = "none"
+  let listOfKeys = Object.keys(controls)
   //Code to unrender all the elements rendered by renderControls()
   let loopLength = document.getElementsByClassName("control-input-label").length
   let myObj = document.getElementsByClassName("control-input-label")
@@ -65,7 +62,42 @@ function saveAndCloseControlsModal(){
   for(i=0; i<loopLength; i++){
     myObj[0].remove()
     myObj2[0].remove()
+    //Save keys to local storage line of code
+    localStorage.setItem(listOfKeys[i],controls[listOfKeys[i]])
   }
+  saveTuningAndControlToLocalStorage()
+  unloadControls()
+  loadControls()
+}
+
+function saveAndCloseTuningModal(){
+  stage = 0
+  modal = document.getElementById("change-tuning-modal")
+  modal.style.display = "none"
+  let listOfKeys = Object.keys(tuning)
+  for(i=0; i<listOfKeys.length; i++){
+    let elementValue = parseInt(document.getElementById(listOfKeys[i]+"-input").value)
+    if (elementValue <= 1000 && elementValue >= 0){
+      tuning[listOfKeys[i]] = elementValue
+    }else if(elementValue > 1000){
+      tuning[listOfKeys[i]] = 1000
+    }else if(elementValue < 0){
+      tuning[listOfKeys[i]] = 0
+    }else{
+      tuning[listOfKeys[i]] = 0
+    }
+  }
+  //Code to unrender all the elements rendered by renderTuning()
+  let loopLength = document.getElementsByClassName("tuning-input-label").length
+  let myObj = document.getElementsByClassName("tuning-input-label")
+  let myObj2 = document.getElementsByClassName("control-tuning-div")
+  for(i=0; i<loopLength; i++){
+    myObj[0].remove()
+    myObj2[0].remove()
+  }
+  saveTuningAndControlToLocalStorage()
+  unloadTuning()
+  loadTuning()
 }
 
 function renderControls(){
@@ -102,6 +134,37 @@ function renderControls(){
   }
 }
 
+function renderTuning(){
+  stage = 4
+  //Dont need to implement new stage I think because eventually you wont be able to change tuning midgame
+  let listOfKeys = Object.keys(tuning)
+  let listOfValues = Object.values(tuning)
+  for(i=0; i<listOfKeys.length; i++){
+    //Creates the text
+    let modal = document.getElementById("actual-tuning-label")
+    let node = document.createElement("div")
+    node.className = "tuning-input-label"
+    let textNode = document.createTextNode(listOfKeys[i])
+    node.appendChild(textNode)
+    modal.appendChild(node)
+    //Creates input div
+    let inputModal = document.getElementById("actual-tuning-input")
+    let inputDivNode = document.createElement("div")
+    inputDivNode.className = "control-tuning-div"
+    inputDivNode.id = listOfKeys[i]
+    inputModal.appendChild(inputDivNode)
+    //Creates the input
+    let inputDivModal = document.getElementById(listOfKeys[i])
+    let inputNode = document.createElement("input")
+    inputNode.className = "tuning-input-input"
+    inputNode.type =
+    inputNode.id = listOfKeys[i] + "-input"
+    let inputTextNode = document.createTextNode(listOfValues[i])
+    inputNode.appendChild(inputTextNode)
+    inputDivModal.appendChild(inputNode)
+  }
+}
+
 function changeKey(key){
   //Destructuring assignment cant work idk why
   stage = 4
@@ -120,4 +183,45 @@ function changeKey(key){
   })
 }
 
+function unloadControls(){
+  let listOfKeys = Object.keys(controls)
+  let listOfValues = Object.values(controls)
+  for(i=0; i<listOfKeys.length; i++){
+    document.getElementById("control-list").children[0].remove()
+  }
+}
+
+function unloadTuning(){
+  let listOfKeys = Object.keys(tuning)
+  let listOfValues = Object.values(tuning)
+  for(i=0; i<listOfKeys.length; i++){
+    document.getElementById("tuning-list").children[0].remove()
+  }
+}
+
+function saveTuningAndControlToLocalStorage(){
+  let listOfKeys = Object.keys(tuning)
+  for(i=0; i<listOfKeys.length; i++){
+    localStorage.setItem(listOfKeys[i],tuning[listOfKeys[i]])
+  }
+  listOfKeys = Object.keys(controls)
+  for(i=0; i<listOfKeys.length; i++){
+    localStorage.setItem(listOfKeys[i],controls[listOfKeys[i]])
+  }
+}
+
+function initializeControlsAndTuning(){
+  if (localStorage.length == 12){
+    let listOfKeys = Object.keys(controls)
+    for(i=0; i<listOfKeys.length; i++){
+      let tempValue = localStorage.getItem(listOfKeys[i])
+      controls[listOfKeys[i]] = tempValue
+    }
+    listOfKeys = Object.keys(tuning)
+    for(i=0; i<listOfKeys.length; i++){
+      let tempValue = localStorage.getItem(listOfKeys[i])
+      tuning[listOfKeys[i]] = tempValue
+    }
+  }
+}
 

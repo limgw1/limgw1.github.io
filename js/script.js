@@ -200,42 +200,44 @@ function updateTimer(){
 
 
 document.addEventListener("keydown", (e)=> {
-  e.preventDefault()
-  switch(e.key){
-    case controls.rotateClockwise:
-      currentPiece.rotateClockwise()
-      break
-    case controls.moveRight:
-      if(!this.ispressedDown){
-        currentPiece.mainMoveFunction(e)
+  if (stage == 0){
+    e.preventDefault()
+    switch(e.key){
+      case controls.rotateClockwise:
+        currentPiece.rotateClockwise()
         break
-      }
-    case controls.softDrop:
-      if(!this.ispressedDown){
-        currentPiece.mainSoftDropFunction(e)
+      case controls.moveRight:
+        if(!this.ispressedDown){
+          currentPiece.mainMoveFunction(e)
+          break
+        }
+      case controls.softDrop:
+        if(!this.ispressedDown){
+          currentPiece.mainSoftDropFunction(e)
+          break
+        }
+      case controls.moveLeft:
+        if(!this.ispressedDown){
+          console.log("Moving left")
+          currentPiece.mainMoveFunction(e)
+          break
+        }
+      case controls.hardDrop:
+        currentPiece.hardDrop()
         break
-      }
-    case controls.moveLeft:
-      if(!this.ispressedDown){
-        console.log("Moving left")
-        currentPiece.mainMoveFunction(e)
+      case controls.rotateCounterclockwise:
+        currentPiece.rotateCounterClockwise()
         break
-      }
-    case controls.hardDrop:
-      currentPiece.hardDrop()
-      break
-    case controls.rotateCounterclockwise:
-      currentPiece.rotateCounterClockwise()
-      break
-    case controls.rotate180:
-      currentPiece.rotate180()
-      break
-    case controls.hold:
-      holdPiece()
-      break
-    case controls.restart:
-      startGame()
-      break
+      case controls.rotate180:
+        currentPiece.rotate180()
+        break
+      case controls.hold:
+        holdPiece()
+        break
+      case controls.restart:
+        startGame()
+        break
+    }
   }
 })
 
@@ -273,5 +275,8 @@ function endGame(){
 }
 
 grid = makeStartingGrid()
+initializeControlsAndTuning()
 loadControls()
+loadTuning()
+
 
