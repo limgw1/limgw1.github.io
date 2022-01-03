@@ -24,7 +24,7 @@ let pieceCount = 0
 
 //Variables for the game
 let gameBag = []
-let currentPiece = null
+var currentPiece = null
 
 //Variables for holding
 let savedPiece = null //Stores the HoldPiece model
@@ -165,8 +165,6 @@ let holdPiece = () => {
   newGameState()
 }
 
-//TODO: Keep this in 60fps
-//ASYNC AWAIT IS THE ONLY WAY TO ADD DELAY TO THE JS CODE
 //https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
 let sleep = (ms) => {
   return new Promise(resolve=>setTimeout(resolve,ms))
@@ -199,38 +197,52 @@ function updateTimer(){
 //End of code
 
 
+//Code for controls
+
 document.addEventListener("keydown", (e)=> {
   if (stage == 0 || stage == 1){
     e.preventDefault()
     switch(e.key){
       case controls.rotateClockwise:
-        currentPiece.rotateClockwise()
+        rotateClockwise(currentPiece)
         break
       case controls.moveRight:
-        if(!this.ispressedDown){
-          currentPiece.mainMoveFunction(e)
+        if(!isPressedDown){
+          mainMoveFunction(e, currentPiece)
+          break
+        }else{
           break
         }
       case controls.softDrop:
-        if(!this.ispressedDown){
-          currentPiece.mainSoftDropFunction(e)
+        if(!isPressedDown){
+          isPressedDown = true
+          mainSoftDropFunction(e, currentPiece)
+          break
+        }else{
           break
         }
       case controls.moveLeft:
-        if(!this.ispressedDown){
-          console.log("Moving left")
-          currentPiece.mainMoveFunction(e)
+        if(!isPressedDown){
+          mainMoveFunction(e, currentPiece)
+          break
+        }else{
           break
         }
       case controls.hardDrop:
-        currentPiece.hardDrop()
+        isPressedDown = true
+        hardDrop(currentPiece)
         break
       case controls.rotateCounterclockwise:
-        currentPiece.rotateCounterClockwise()
+        rotateCounterClockwise(currentPiece)
         break
       case controls.rotate180:
-        currentPiece.rotate180()
-        break
+        if(!isPressedDown){
+          isPressedDown = true
+          rotate180(currentPiece)
+          break
+        }else{
+          break
+        }
       case controls.hold:
         holdPiece()
         break
@@ -245,13 +257,16 @@ document.addEventListener("keyup", (e)=> {
   e.preventDefault()
   switch(e.key){
     case controls.moveLeft:
-      currentPiece.keyupFunc(e)
+      keyupFunc(e)
       break
     case controls.moveRight:
-      currentPiece.keyupFunc(e)
+      keyupFunc(e)
       break
     case controls.softDrop:
-      currentPiece.keyupFunc(e)
+      keyupFunc(e)
+      break
+    case controls.hardDrop:
+      keyupFunc(e)
       break
   }
 })
@@ -275,7 +290,6 @@ function endGame(){
 }
 
 grid = makeStartingGrid()
-initializeControlsAndTuning()
 loadControls()
 loadTuning()
 
