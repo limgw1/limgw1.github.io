@@ -157,7 +157,6 @@ function renderTuning(){
     let inputDivModal = document.getElementById(listOfKeys[i])
     let inputNode = document.createElement("input")
     inputNode.className = "tuning-input-input"
-    inputNode.type =
     inputNode.id = listOfKeys[i] + "-input"
     let inputTextNode = document.createTextNode(listOfValues[i])
     inputNode.appendChild(inputTextNode)
@@ -225,3 +224,4 @@ function initializeControlsAndTuning(){
   }
 }
 
+initializeControlsAndTuning()

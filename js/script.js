@@ -13,6 +13,15 @@ boardContext.scale(PIECE_WIDTH, PIECE_WIDTH)
 queueContext.scale(PIECE_WIDTH, PIECE_WIDTH)
 holdContext.scale(PIECE_WIDTH, PIECE_WIDTH)
 
+//Variable for control
+let controlsMap = {}
+
+//Variables to make sure these controls dont repeat with OS's ARR when held down
+let hardDropRepeatBlocker = false
+let repeatBlockerCounterclockwise = false
+let repeatBlockerClockwise = false
+let repeatBlocker180 = false
+
 //Variables for the board
 let grid = []
 let stage = 0 //Stage 0 for unrendered game, Stage 1 for active game, Stage 2 for finished game, Stage 3 for paused game, Stage 4 for controls
@@ -24,7 +33,7 @@ let pieceCount = 0
 
 //Variables for the game
 let gameBag = []
-let currentPiece = null
+var currentPiece = null
 
 //Variables for holding
 let savedPiece = null //Stores the HoldPiece model
@@ -80,7 +89,7 @@ let newGameState = () => {
 let renderGameState = () => {
   //Renders the board
   if (!linesLeft <= 0){
-    currentPiece.checkSpawn()
+    checkSpawn(currentPiece.x, currentPiece.y)
   }
   for (let i = 0; i < grid.length; i++){
     for (let j = 0; j < grid[i].length; j++){
@@ -165,8 +174,6 @@ let holdPiece = () => {
   newGameState()
 }
 
-//TODO: Keep this in 60fps
-//ASYNC AWAIT IS THE ONLY WAY TO ADD DELAY TO THE JS CODE
 //https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
 let sleep = (ms) => {
   return new Promise(resolve=>setTimeout(resolve,ms))
@@ -199,59 +206,189 @@ function updateTimer(){
 //End of code
 
 
-document.addEventListener("keydown", (e)=> {
+//Code for controls
+onkeydown = function(e){
   if (stage == 0 || stage == 1){
     e.preventDefault()
-    switch(e.key){
-      case controls.rotateClockwise:
-        currentPiece.rotateClockwise()
-        break
-      case controls.moveRight:
-        if(!this.ispressedDown){
-          currentPiece.mainMoveFunction(e)
-          break
-        }
-      case controls.softDrop:
-        if(!this.ispressedDown){
-          currentPiece.mainSoftDropFunction(e)
-          break
-        }
-      case controls.moveLeft:
-        if(!this.ispressedDown){
-          console.log("Moving left")
-          currentPiece.mainMoveFunction(e)
-          break
-        }
-      case controls.hardDrop:
-        currentPiece.hardDrop()
-        break
-      case controls.rotateCounterclockwise:
-        currentPiece.rotateCounterClockwise()
-        break
-      case controls.rotate180:
-        currentPiece.rotate180()
-        break
-      case controls.hold:
-        holdPiece()
-        break
-      case controls.restart:
-        startGame()
-        break
+    controlsMap[e.key] = e.type == 'keydown'
+    if(controlsMap[controls.rotateClockwise] == true){
+      if(!repeatBlockerClockwise){
+        repeatBlockerClockwise = true
+        rotateClockwise(currentPiece)
+      }
     }
-  }
-})
+    if(controlsMap[controls.rotateCounterclockwise] == true){
+      if(!repeatBlockerCounterclockwise){
+        repeatBlockerCounterclockwise = true
+        rotateCounterClockwise(currentPiece)
+      }
+    }
+    if(controlsMap[controls.rotate180] == true){
+      if(!repeatBlocker180){
+        repeatBlocker180 = true
+        rotate180(currentPiece)
+      }
+    }
+    if(controlsMap[controls.softDrop] == true && !isSoftDropping){
+      isSoftDropping = true
+      mainSoftDropFunction(e, currentPiece)
+    }
+    if(controlsMap[controls.hardDrop] == true){
+      if (!hardDropRepeatBlocker){
+        isPressedDown = true
+        hardDropRepeatBlocker = true
+        hardDrop(currentPiece)
+      }
+    }
+    if(controlsMap[controls.moveLeft] == true && !isPressedDown){
+      console.log("Moving left")
+      mainMoveFunction(e, currentPiece)
+    }
+    if(controlsMap[controls.moveRight] == true && !isPressedDown){
+      console.log("Moving left")
+      mainMoveFunction(e, currentPiece)
+    }
+    if(controlsMap[controls.hold] == true){
+      holdPiece()
+    }
+    if(controlsMap[controls.restart] == true){
+      startGame()
+    }
+  }}
+
+    // switch(controlsMap){
+    //   case controls.rotateClockwise:
+    //     rotateClockwise(currentPiece)
+    //     break
+    //   case controls.moveRight:
+    //     if(!isPressedDown){
+    //       mainMoveFunction(e, currentPiece)
+    //       break
+    //     }else{
+    //       break
+    //     }
+    //   case controls.softDrop:
+    //     if(!isPressedDown){
+    //       isPressedDown = true
+    //       mainSoftDropFunction(e, currentPiece)
+    //       break
+    //     }else{
+    //       break
+    //     }
+    //   case controls.moveLeft:
+    //     if(!isPressedDown){
+    //       mainMoveFunction(e, currentPiece)
+    //       break
+    //     }else{
+    //       break
+    //     }
+    //   case controls.hardDrop:
+    //     isPressedDown = true
+    //     hardDrop(currentPiece)
+    //     break
+    //   case controls.rotateCounterclockwise:
+    //     rotateCounterClockwise(currentPiece)
+    //     break
+    //   case controls.rotate180:
+    //     if(!isPressedDown){
+    //       isPressedDown = true
+    //       rotate180(currentPiece)
+    //       break
+    //     }else{
+    //       break
+    //     }
+    //   case controls.hold:
+    //     holdPiece()
+    //     break
+    //   case controls.restart:
+    //     startGame()
+    //     break
+    // }
+
+
+
+
+// document.addEventListener("keydown", (e)=> {
+//   if (stage == 0 || stage == 1){
+//     e.preventDefault()
+//     switch(e.key){
+//       case controls.rotateClockwise:
+//         rotateClockwise(currentPiece)
+//         break
+//       case controls.moveRight:
+//         if(!isPressedDown){
+//           mainMoveFunction(e, currentPiece)
+//           break
+//         }else{
+//           break
+//         }
+//       case controls.softDrop:
+//         if(!isPressedDown){
+//           isPressedDown = true
+//           mainSoftDropFunction(e, currentPiece)
+//           break
+//         }else{
+//           break
+//         }
+//       case controls.moveLeft:
+//         if(!isPressedDown){
+//           mainMoveFunction(e, currentPiece)
+//           break
+//         }else{
+//           break
+//         }
+//       case controls.hardDrop:
+//         isPressedDown = true
+//         hardDrop(currentPiece)
+//         break
+//       case controls.rotateCounterclockwise:
+//         rotateCounterClockwise(currentPiece)
+//         break
+//       case controls.rotate180:
+//         if(!isPressedDown){
+//           isPressedDown = true
+//           rotate180(currentPiece)
+//           break
+//         }else{
+//           break
+//         }
+//       case controls.hold:
+//         holdPiece()
+//         break
+//       case controls.restart:
+//         startGame()
+//         break
+//     }
+//   }
+// })
 
 document.addEventListener("keyup", (e)=> {
+  controlsMap[e.key] = e.type == 'keydown'
   e.preventDefault()
+  console.log(controlsMap)
   switch(e.key){
     case controls.moveLeft:
-      currentPiece.keyupFunc(e)
+      keyupFunc(e)
       break
     case controls.moveRight:
-      currentPiece.keyupFunc(e)
+      keyupFunc(e)
       break
     case controls.softDrop:
-      currentPiece.keyupFunc(e)
+      isSoftDropping = false
+      keyupFunc(e)
+      break
+    case controls.hardDrop:
+      hardDropRepeatBlocker = false
+      keyupFunc(e)
+      break
+    case controls.rotateClockwise:
+      repeatBlockerClockwise = false
+      break
+    case controls.rotateCounterclockwise:
+      repeatBlockerCounterclockwise = false
+      break
+    case controls.rotate180:
+      repeatBlocker180 = false
       break
   }
 })
@@ -275,7 +412,6 @@ function endGame(){
 }
 
 grid = makeStartingGrid()
-initializeControlsAndTuning()
 loadControls()
 loadTuning()
 
