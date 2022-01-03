@@ -3,7 +3,8 @@
 settingsDAS = tuning['delayedAutoShift']
 settingsARR = tuning['automaticRepeatRate']
 settingsSDRR = tuning['softDropRepeatRate']
-isPressedDown = false;
+isPressedDown = false; //for move right/left
+isSoftDropping = false; //for sd
 dasCharged = false;
 timeStartOfDAS = 0;
 timeStartOfARR = 0;
@@ -16,6 +17,26 @@ landed = false;
 lockDelay = 0;
 waitingForLockDelay = false;
 
+//=====Handling spawn check=====
+function checkSpawn(x, y, candidate=null){
+  const shape =  candidate || currentPiece.shape
+  const n = shape.length
+  if (collision(currentPiece.x, currentPiece.y+1,)){
+    this.lockDelayTest(x, y)
+  }
+  for (let i = 0; i < n; i++){ //Checks every block in the tetromino matrix
+    for (let j = 0; j < n; j++){
+      if (shape[i][j] > 0){
+        if (grid[i][j] > 0){
+          alert("Game over!")
+          stage = 0
+          endGame()
+          break
+        }
+      }
+    }
+  }
+}
 //=====Handling hard drop=====
 function hardDrop(){
   //CHANGE  CODE IF THERE IS ANOTHER TIMEOUT IN THE FUTURE
@@ -55,15 +76,15 @@ function hardDrop(){
 
 //=====Handling Soft drop=====
 function mainSoftDropFunction(e){
-  let softDropInterval = setInterval(() => {
-    if (isPressedDown){
+  console.log("Main soft drop function called")
+  softDropInterval = setInterval(() => {
+    if (isSoftDropping){
       moveDown()
     }
   },4)
-  if (e.key == controls.softDrop){
+  if (controlsMap[controls.softDrop] == true){
     moveDown()
     timeStartOfSDRR = Date.now()
-    isPressedDown = true
     softDropInterval()
   }
 }
@@ -83,6 +104,7 @@ function moveDown(){
     }
     if (Date.now() - timeStartOfSDRR >= settingsSDRR){
       if (collision(currentPiece.x, currentPiece.y+1)){
+        // lockDelayTest(currentPiece.x, currentPiece.y)
       }else{
         currentPiece.y += 1
       }
@@ -94,7 +116,6 @@ function moveDown(){
 
 //=====Handling collision=====
 function collision(x, y, candidate=null){ //Takes in current top left corner of the nxn matrix of the piece
-  console.log(candidate)
   const shape =  candidate || currentPiece.shape
   const n = shape.length
   for (let i = 0; i < n; i++){ //Checks every block in the tetromino matrix
@@ -105,12 +126,10 @@ function collision(x, y, candidate=null){ //Takes in current top left corner of 
         if (p >= 0 && p < COLS && q < ROWS){
           //If any of the pieces touches another non-blank square, return true
           if (grid[q][p] > 0){
-            console.log("Touched a non blank square")
             return true
           }
         }
         else{
-          console.log("Out of bounds")
           return true
         }
       }
@@ -188,6 +207,7 @@ function translate(e){
 
 //=====Handling lock delay test=====
 function lockDelayTest(x,y){
+  console.log("Lock delay test called")
   const shape = currentPiece.shape
   const n = shape.length
   loop1:
@@ -199,12 +219,10 @@ function lockDelayTest(x,y){
         let q = y + i + 1 //This is the up down direction
         if (p >= 0 && p < COLS && q < ROWS){
           if (grid[q][p] > 0){
-            console.log("landed 1")
             landed = true
             break loop1;
           }
         }else if(q >= ROWS){
-          console.log("landed 2")
           landed = true
           break loop1;
         }else{
@@ -215,7 +233,6 @@ function lockDelayTest(x,y){
     }
   }
   if (landed && !waitingForLockDelay){
-    console.log("lockdelaycountdown initiated")
     lockDelayCountdown()
     waitingForLockDelay = true
   }
@@ -223,12 +240,10 @@ function lockDelayTest(x,y){
 }
 
 function lockDelayCountdown(){
-  console.log("Countdown initiated")
   lockDelayTimeout = setTimeout(() => {
     if(landed == true){
-      lockPiece(currentPiece)
-      console.log("lockdelay false 2")
       waitingForLockDelay = false
+      lockPiece(currentPiece)
     }
   },LOCK_DELAY)
 }
@@ -271,12 +286,13 @@ function rotateClockwise(){
   }
   // Reverse order of rows
   shape.forEach((row => row.reverse()))
-  if (!collision(currentPiece.x, currentPiece.y)) {
+  if (!collision(currentPiece.x, currentPiece.y, shape)) {
     currentPiece.shape = shape
   }
   renderGameState()
   lockDelayTest(currentPiece.x, currentPiece.y)
 }
+
 function rotateCounterClockwise(){
   let shape = [...currentPiece.shape.map((row) => [...row])]
   // Reverse order of rows
@@ -287,7 +303,7 @@ function rotateCounterClockwise(){
       [shape[x][y], shape[y][x]] = [shape[y][x], shape[x][y]]
     }
   }
-  if (!collision(currentPiece.x, currentPiece.y)) {
+  if (!collision(currentPiece.x, currentPiece.y, shape)) {
     currentPiece.shape = shape
   }
   renderGameState()
@@ -309,7 +325,7 @@ function rotate180(){
 function keyupFunc(e){
   if((e.key == controls.moveLeft || e.key == controls.moveRight || e.key == controls.softDrop) && isPressedDown){
     for(i=0;i<9999;i++){
-      if (i !== timeInterval && i !== lockDelayTimeout){
+      if (i !== timeInterval && i !== lockDelayTimeout && i !== softDropInterval){
         clearInterval(i)
       }
     }
@@ -319,8 +335,8 @@ function keyupFunc(e){
     timeStartOfARR = 0
     timeStartOfSDRR = 0
     moveInterval = null
-    softDropInterval = null
     lockDelayTimeout = null
+    console.log(isSoftDropping)
   }else{
       console.log("keyupfunc error")
   }
@@ -341,25 +357,7 @@ class Piece {
 
   }
 
-  checkSpawn(x =this.x, y = this.y, candidate=null){
-    const shape =  candidate || this.shape
-    const n = shape.length
-    if (this.collision(x, y+1, shape)){
-      this.lockDelayTest(x, y)
-    }
-    for (let i = 0; i < n; i++){ //Checks every block in the tetromino matrix
-      for (let j = 0; j < n; j++){
-        if (shape[i][j] > 0){
-          if (grid[i][j] > 0){
-            alert("Game over!")
-            stage = 0
-            endGame()
-            break
-          }
-        }
-      }
-    }
-  }
+
 
   renderPiece(){
     this.shape.map((row, i) => {
@@ -410,12 +408,10 @@ class Piece {
           let q = y + i + 1 //This is the up down direction
           if (p >= 0 && p < COLS && q < ROWS){
             if (grid[q][p] > 0){
-              console.log("landed 1")
               this.landed = true
               break loop1;
             }
           }else if(q >= ROWS){
-            console.log("landed 2")
             this.landed = true
             break loop1;
           }else{
@@ -426,19 +422,17 @@ class Piece {
       }
     }
     if (this.landed && !this.waitingForLockDelay){
-      console.log("lockdelaycountdown initiated")
-      this.lockDelayCountdown()
       this.waitingForLockDelay = true
+      this.lockDelayCountdown()
     }
     return false
   }
 
   lockDelayCountdown(){
-    console.log("Countdown initiated")
+    console.log("Lock delay inside piece class")
     lockDelayTimeout = setTimeout(() => {
       if(this.landed == true){
         this.lockPiece()
-        console.log("lockdelay false 2")
         this.waitingForLockDelay = false
       }
     },LOCK_DELAY)
