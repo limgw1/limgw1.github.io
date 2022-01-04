@@ -241,11 +241,9 @@ onkeydown = function(e){
       }
     }
     if(controlsMap[controls.moveLeft] == true && !isPressedDown){
-      console.log("Moving left")
       mainMoveFunction(e, currentPiece)
     }
     if(controlsMap[controls.moveRight] == true && !isPressedDown){
-      console.log("Moving left")
       mainMoveFunction(e, currentPiece)
     }
     if(controlsMap[controls.hold] == true){
@@ -256,116 +254,10 @@ onkeydown = function(e){
     }
   }}
 
-    // switch(controlsMap){
-    //   case controls.rotateClockwise:
-    //     rotateClockwise(currentPiece)
-    //     break
-    //   case controls.moveRight:
-    //     if(!isPressedDown){
-    //       mainMoveFunction(e, currentPiece)
-    //       break
-    //     }else{
-    //       break
-    //     }
-    //   case controls.softDrop:
-    //     if(!isPressedDown){
-    //       isPressedDown = true
-    //       mainSoftDropFunction(e, currentPiece)
-    //       break
-    //     }else{
-    //       break
-    //     }
-    //   case controls.moveLeft:
-    //     if(!isPressedDown){
-    //       mainMoveFunction(e, currentPiece)
-    //       break
-    //     }else{
-    //       break
-    //     }
-    //   case controls.hardDrop:
-    //     isPressedDown = true
-    //     hardDrop(currentPiece)
-    //     break
-    //   case controls.rotateCounterclockwise:
-    //     rotateCounterClockwise(currentPiece)
-    //     break
-    //   case controls.rotate180:
-    //     if(!isPressedDown){
-    //       isPressedDown = true
-    //       rotate180(currentPiece)
-    //       break
-    //     }else{
-    //       break
-    //     }
-    //   case controls.hold:
-    //     holdPiece()
-    //     break
-    //   case controls.restart:
-    //     startGame()
-    //     break
-    // }
-
-
-
-
-// document.addEventListener("keydown", (e)=> {
-//   if (stage == 0 || stage == 1){
-//     e.preventDefault()
-//     switch(e.key){
-//       case controls.rotateClockwise:
-//         rotateClockwise(currentPiece)
-//         break
-//       case controls.moveRight:
-//         if(!isPressedDown){
-//           mainMoveFunction(e, currentPiece)
-//           break
-//         }else{
-//           break
-//         }
-//       case controls.softDrop:
-//         if(!isPressedDown){
-//           isPressedDown = true
-//           mainSoftDropFunction(e, currentPiece)
-//           break
-//         }else{
-//           break
-//         }
-//       case controls.moveLeft:
-//         if(!isPressedDown){
-//           mainMoveFunction(e, currentPiece)
-//           break
-//         }else{
-//           break
-//         }
-//       case controls.hardDrop:
-//         isPressedDown = true
-//         hardDrop(currentPiece)
-//         break
-//       case controls.rotateCounterclockwise:
-//         rotateCounterClockwise(currentPiece)
-//         break
-//       case controls.rotate180:
-//         if(!isPressedDown){
-//           isPressedDown = true
-//           rotate180(currentPiece)
-//           break
-//         }else{
-//           break
-//         }
-//       case controls.hold:
-//         holdPiece()
-//         break
-//       case controls.restart:
-//         startGame()
-//         break
-//     }
-//   }
-// })
 
 document.addEventListener("keyup", (e)=> {
   controlsMap[e.key] = e.type == 'keydown'
   e.preventDefault()
-  console.log(controlsMap)
   switch(e.key){
     case controls.moveLeft:
       keyupFunc(e)

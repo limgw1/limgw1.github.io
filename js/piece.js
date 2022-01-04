@@ -22,7 +22,7 @@ function checkSpawn(x, y, candidate=null){
   const shape =  candidate || currentPiece.shape
   const n = shape.length
   if (collision(currentPiece.x, currentPiece.y+1,)){
-    this.lockDelayTest(x, y)
+    lockDelayTest(x, y)
   }
   for (let i = 0; i < n; i++){ //Checks every block in the tetromino matrix
     for (let j = 0; j < n; j++){
@@ -76,7 +76,6 @@ function hardDrop(){
 
 //=====Handling Soft drop=====
 function mainSoftDropFunction(e){
-  console.log("Main soft drop function called")
   softDropInterval = setInterval(() => {
     if (isSoftDropping){
       moveDown()
@@ -111,7 +110,7 @@ function moveDown(){
       timeStartOfSDRR = 0
     }
   }
-  newGameState()
+  newGameState() //why is this needed?
 }
 
 //=====Handling collision=====
@@ -186,28 +185,23 @@ function translate(e){
       currentPiece.x += 1
       landed = false
       waitingForLockDelay = false
-    }else if(collision(currentPiece.x+1, currentPiece.y)){
-      lockDelayTest(currentPiece.x, currentPiece.y)
     }
   }else if (e.key == controls.moveLeft){
     //move left
-    if (!currentPiece.collision(currentPiece.x-1, currentPiece.y)){
+    if (!collision(currentPiece.x-1, currentPiece.y)){
       currentPiece.x -= 1
       landed = false
       waitingForLockDelay = false
-    }else if(currentPiece.collision(currentPiece.x-1,currentPiece.y)){
-      lockDelayTest(currentPiece.x, currentPiece.y, currentPiece)
+    }else if(collision(currentPiece.x-1,currentPiece.y)){
     }
   }else{
     console.log("Errors")
   }
   renderGameState()
-  lockDelayTest(currentPiece.x, currentPiece.y, currentPiece)
 }
 
 //=====Handling lock delay test=====
 function lockDelayTest(x,y){
-  console.log("Lock delay test called")
   const shape = currentPiece.shape
   const n = shape.length
   loop1:
@@ -233,15 +227,15 @@ function lockDelayTest(x,y){
     }
   }
   if (landed && !waitingForLockDelay){
-    lockDelayCountdown()
     waitingForLockDelay = true
+    lockDelayCountdown()
   }
   return false
 }
 
 function lockDelayCountdown(){
   lockDelayTimeout = setTimeout(() => {
-    if(landed == true){
+    if(landed && waitingForLockDelay){
       waitingForLockDelay = false
       lockPiece(currentPiece)
     }
@@ -249,7 +243,7 @@ function lockDelayCountdown(){
 }
 
 function lockPiece(){
-  if (landed == true){
+  if (landed){
     const shape = currentPiece.shape
     const x = currentPiece.x
     const y = currentPiece.y
@@ -263,11 +257,19 @@ function lockPiece(){
       })
     holded = false
     })
-    if (currentPiece.y === 0){
-      alert("Game over!")
-      stage = 0
-      endGame()
+    for (let i = 0; i < grid.length; i++){
+      for (let j = 0; j < grid[i].length; j++){
+        let cell = grid[i][j]
+        boardContext.fillStyle = COLORS[cell]
+        boardContext.fillRect(j, i, 1, 1)
+      }
     }
+    //Might not need this, just game over when new piece spawns
+    // if (currentPiece.y === 0){
+    //   alert("Game over!")
+    //   stage = 0
+    //   endGame()
+    // }
     currentPiece = null
     pieceCount ++
     document.getElementById("piece-count").textContent = "Piece: " +pieceCount
@@ -334,9 +336,13 @@ function keyupFunc(e){
     timeStartOfDAS = 0
     timeStartOfARR = 0
     timeStartOfSDRR = 0
-    moveInterval = null
+  }else if(e.key == controls.hardDrop){
+    for(i=0;i<9999;i++){
+      if (i !== timeInterval && i !== lockDelayTimeout && i !== softDropInterval && i !== moveInterval){
+        clearInterval(i)
+      }
+    }
     lockDelayTimeout = null
-    console.log(isSoftDropping)
   }else{
       console.log("keyupfunc error")
   }
@@ -429,7 +435,6 @@ class Piece {
   }
 
   lockDelayCountdown(){
-    console.log("Lock delay inside piece class")
     lockDelayTimeout = setTimeout(() => {
       if(this.landed == true){
         this.lockPiece()
