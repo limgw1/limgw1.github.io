@@ -6,7 +6,9 @@ settingsSDRR = tuning['softDropRepeatRate']
 isPressedDown = false; //for move right/left
 isSoftDropping = false; //for sd
 dasCharged = false;
-timeStartOfDAS = 0;
+resetDAS = false;
+timeStartOfLeftDAS = false;
+timeStartOfRightDAS = false;
 timeStartOfARR = 0;
 timeStartOfSDRR = 0;
 moveInterval = null;
@@ -92,7 +94,8 @@ function moveDown(){
   if (tuning.softDropRepeatRate == 0){
     while(!collision(currentPiece.x, currentPiece.y+1)){
       if (collision(currentPiece.x, currentPiece.y+1)){
-      break
+        landed = true
+        break
       }else{
         currentPiece.y += 1
       }
@@ -103,7 +106,7 @@ function moveDown(){
     }
     if (Date.now() - timeStartOfSDRR >= settingsSDRR){
       if (collision(currentPiece.x, currentPiece.y+1)){
-        // lockDelayTest(currentPiece.x, currentPiece.y)
+        landed = true
       }else{
         currentPiece.y += 1
       }
@@ -137,33 +140,67 @@ function collision(x, y, candidate=null){ //Takes in current top left corner of 
   return false
 }
 //=====Handling moving left and right=====
-function mainMoveFunction(e){
-  if ((e.key == controls.moveLeft || e.key == controls.moveRight) && !isPressedDown){
-    translate(e)
+function mainMoveFunction(){
+  if (dirKeyPressed == 0){
+    translate()
+    isPressedDown = true
+    moveInterval = setInterval(() => {move()},100)
+  }else if(dirKeyPressed !== 0){
+    console.log("mainmovefunction called when dirkeypress not 0")
+    timeStartOfDAS = Date.now()
+    multipleKeyPressTranslate()
+  }else if(holded){
+    //This case for after piece is holded we want the newly swapped piece to continue moving
+    translate()
     timeStartOfDAS = Date.now()
     isPressedDown = true
-    //Had to set it up like that in order to clear it on keyUpFunc
-    moveInterval = setInterval(() => {move(e)},4)
+    moveInterval = setInterval(() => {move()},100)
+  }else{
+    console.log("Main Move Function error")
   }
 }
 
-function move(e){
-  if ((e.key == controls.moveLeft || e.key == controls.moveRight) && !dasCharged && isPressedDown){
-    if (Date.now() - timeStartOfDAS >= settingsDAS){
-        dasCharged = true
-        timeStartOfARR = Date.now()
-    }
-    isPressedDown = true
-  }else if((e.key == controls.moveLeft || e.key == controls.moveRight) && dasCharged && isPressedDown){
+function move(){
+  console.log(dasCharged)
+  console.log(isPressedDown)
+  if((Date.now()-timeStartOfDAS) >= settingsDAS){
+    dasCharged = true
+  }else{
+    dasCharged = false
+  }
+  if(dasCharged && isPressedDown){
     if ((Date.now() - timeStartOfARR) >= settingsARR){
-        translate(e)
+        translate()
         timeStartOfARR = Date.now()
       }
   }
 }
 
-function translate(e){
-  if (e.key == controls.moveRight && settingsARR == 0 && dasCharged) {
+function multipleKeyPressTranslate(){
+  if (lastActivatedDirection == "R" && dirKeyPressed >= 1) {
+    //move right
+    console.log("MultipleKeypressTranslate move right")
+    if (!collision(currentPiece.x+1, currentPiece.y)){
+      currentPiece.x += 1
+      landed = false
+      waitingForLockDelay = false
+    }
+  }else if (lastActivatedDirection == "L" && dirKeyPressed >= 1){
+    //move left
+    console.log("MultipleKeypressTranslate move left")
+    if (!collision(currentPiece.x-1, currentPiece.y)){
+      currentPiece.x -= 1
+      landed = false
+      waitingForLockDelay = false
+    }
+  }
+  renderGameState()
+}
+
+function translate(){
+  // console.log(direction)
+  // console.log(dasCharged)
+  if (lastActivatedDirection == "R" && settingsARR == 0 && dasCharged) {
     //move all the way right
     while(!collision(currentPiece.x+1, currentPiece.y)){
       if (collision(currentPiece.x+1, currentPiece.y)){
@@ -171,7 +208,7 @@ function translate(e){
         currentPiece.x += 1
       }
     }
-  }else if (e.key == controls.moveLeft && settingsARR == 0 && dasCharged){
+  }else if (lastActivatedDirection == "L" && settingsARR == 0 && dasCharged){
     //move all the way left
     while(!collision(currentPiece.x-1, currentPiece.y)){
       if (collision(currentPiece.x-1, currentPiece.y)){
@@ -179,14 +216,14 @@ function translate(e){
         currentPiece.x -= 1
       }
     }
-  }else if (e.key == controls.moveRight) {
+  }else if (lastActivatedDirection == "R") {
     //move right
     if (!collision(currentPiece.x+1, currentPiece.y)){
       currentPiece.x += 1
       landed = false
       waitingForLockDelay = false
     }
-  }else if (e.key == controls.moveLeft){
+  }else if (lastActivatedDirection == "L"){
     //move left
     if (!collision(currentPiece.x-1, currentPiece.y)){
       currentPiece.x -= 1
@@ -291,8 +328,10 @@ function rotateClockwise(){
   if (!collision(currentPiece.x, currentPiece.y, shape)) {
     currentPiece.shape = shape
   }
+  if (!collision(currentPiece.x, currentPiece.y+1, shape)){
+    landed = false
+  }
   renderGameState()
-  lockDelayTest(currentPiece.x, currentPiece.y)
 }
 
 function rotateCounterClockwise(){
@@ -308,8 +347,10 @@ function rotateCounterClockwise(){
   if (!collision(currentPiece.x, currentPiece.y, shape)) {
     currentPiece.shape = shape
   }
+  if (!collision(currentPiece.x, currentPiece.y+1, shape)){
+    landed = false
+  }
   renderGameState()
-  lockDelayTest(currentPiece.x, currentPiece.y)
 }
 
 function rotate180(){
@@ -333,7 +374,7 @@ function keyupFunc(e){
     }
     isPressedDown = false
     dasCharged = false
-    timeStartOfDAS = 0
+    timeStartOfDAS = false
     timeStartOfARR = 0
     timeStartOfSDRR = 0
   }else if(e.key == controls.hardDrop){
@@ -343,8 +384,11 @@ function keyupFunc(e){
       }
     }
     lockDelayTimeout = null
+  }else if(e.key == controls.hold){
+    console.log("Hold key up")
   }else{
-      console.log("keyupfunc error")
+    console.log("keyupfunc error")
+    console.log(e.key)
   }
 }
 
@@ -356,11 +400,9 @@ class Piece {
     this.shape = shape
     this.context = context
     this.y = 0 //TODO: I think need to change this for guideline, pieces spawn at 21/22
-    this.x = Math.floor(COLS/2) //TODO: check guideline to see if this is how they make piece spawn in the middle
+    this.x = 3
     this.fromHoldQueue = false
     this.index = 0;
-
-
   }
 
 
