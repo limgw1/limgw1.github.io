@@ -147,7 +147,7 @@ function mainMoveFunction(){
   if (dirKeyPressed == 0){
     translate()
     isPressedDown = true
-    moveInterval = setInterval(() => {move()},100)
+    moveInterval = setInterval(() => {move()},5)
   }else if(dirKeyPressed !== 0){
     console.log("mainmovefunction called when dirkeypress not 0")
     timeStartOfDAS = Date.now()
@@ -157,7 +157,7 @@ function mainMoveFunction(){
     translate()
     timeStartOfDAS = Date.now()
     isPressedDown = true
-    moveInterval = setInterval(() => {move()},100)
+    moveInterval = setInterval(() => {move()},5)
   }else{
     console.log("Main Move Function error")
   }
@@ -165,7 +165,6 @@ function mainMoveFunction(){
 
 function move(){
   console.log(dasCharged)
-  console.log(isPressedDown)
   if((Date.now()-timeStartOfDAS) >= settingsDAS){
     dasCharged = true
   }else{
@@ -388,12 +387,6 @@ function rotate180(){
 
 //===== Handle SRS kicktables =====
 function SRSChecker(x,y,oldShape, newShape, oldOrientation, newOrientation, direction){
-  // console.log(x)
-  // console.log(y)
-  // console.log(oldShape) //Before rotation, return if every test fails
-  // console.log(newShape) //After rotation
-  // console.log(oldOrientation)
-  // console.log(newOrientation)
   if(currentPiece.index !== 1){
     console.log("Running other piece srs")
     if(direction == 0){
@@ -471,16 +464,19 @@ function SRSChecker(x,y,oldShape, newShape, oldOrientation, newOrientation, dire
 //===== What to run when keyup =====
 function keyupFunc(e){
   if((e.key == controls.moveLeft || e.key == controls.moveRight || e.key == controls.softDrop) && isPressedDown){
-    for(i=0;i<9999;i++){
-      if (i !== timeInterval && i !== lockDelayTimeout && i !== softDropInterval){
-        clearInterval(i)
+    if((e.key == controls.softDrop) && (controlsMap["moveLeft"] || controls["moveRight"])){
+    }else{
+      for(i=0;i<9999;i++){
+        if (i !== timeInterval && i !== lockDelayTimeout && i !== softDropInterval){
+          clearInterval(i)
+        }
       }
+      isPressedDown = false
+      dasCharged = false
+      timeStartOfDAS = false
+      timeStartOfARR = 0
+      timeStartOfSDRR = 0
     }
-    isPressedDown = false
-    dasCharged = false
-    timeStartOfDAS = false
-    timeStartOfARR = 0
-    timeStartOfSDRR = 0
   }else if(e.key == controls.hardDrop){
     for(i=0;i<9999;i++){
       if (i !== timeInterval && i !== lockDelayTimeout && i !== softDropInterval && i !== moveInterval){
