@@ -212,6 +212,7 @@ let timeInterval = setInterval(() => {
 function updateTimer(){
   rawTimer ++
   document.getElementById("time").textContent = "Time: "+(rawTimer/100).toFixed(2)
+  document.getElementById("pps").textContent = "PPS: "+(pieceCount/(rawTimer/100)).toFixed(2)
 }
 //End of code
 
