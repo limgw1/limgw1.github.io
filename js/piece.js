@@ -19,6 +19,9 @@ landed = false;
 lockDelay = 0;
 waitingForLockDelay = false;
 
+//=====For orientation math=====//
+function modulo4(pos){return(((pos%4)+4)%4)}
+
 //=====Handling spawn check=====
 function checkSpawn(x, y, candidate=null){
   const shape =  candidate || currentPiece.shape
@@ -316,52 +319,153 @@ function lockPiece(){
 
 //=====Handle rotation======
 function rotateClockwise(){
-  let shape = [...currentPiece.shape.map((row) => [...row])]
+  let suggestedNewShape = [...currentPiece.shape.map((row) => [...row])]
   // Transpose Matrix (basically rotation)
-  for (let y = 0; y< shape.length; y++){
+  for (let y = 0; y< suggestedNewShape.length; y++){
     for (let x = 0; x < y; x++){
-      [shape[x][y], shape[y][x]] = [shape[y][x], shape[x][y]]
+      [suggestedNewShape[x][y], suggestedNewShape[y][x]] = [suggestedNewShape[y][x], suggestedNewShape[x][y]]
     }
   }
   // Reverse order of rows
-  shape.forEach((row => row.reverse()))
-  if (!collision(currentPiece.x, currentPiece.y, shape)) {
-    currentPiece.shape = shape
+  suggestedNewShape.forEach((row => row.reverse()))
+  if (!collision(currentPiece.x, currentPiece.y, suggestedNewShape)) {
+    currentPiece.shape = suggestedNewShape
+    currentPiece.orientation ++
+  }else if (collision(currentPiece.x, currentPiece.y, suggestedNewShape)) {
+    //SRS CHECK CODE HERE
+    let newOrientation = currentPiece.orientation + 1
+    let directionToRun = 0
+    console.log("Running srs checker")
+    SRSChecker(currentPiece.x, currentPiece.y, currentPiece.shape, suggestedNewShape, currentPiece.orientation, newOrientation, directionToRun)
   }
-  if (!collision(currentPiece.x, currentPiece.y+1, shape)){
+  if (!collision(currentPiece.x, currentPiece.y+1, suggestedNewShape)){
     landed = false
   }
   renderGameState()
 }
 
 function rotateCounterClockwise(){
-  let shape = [...currentPiece.shape.map((row) => [...row])]
+  let suggestedNewShape = [...currentPiece.shape.map((row) => [...row])]
   // Reverse order of rows
-  shape.forEach((row => row.reverse()))
+  suggestedNewShape.forEach((row => row.reverse()))
   // Transpose Matrix (basically rotation)
-  for (let y = 0; y< shape.length; y++){
+  for (let y = 0; y< suggestedNewShape.length; y++){
     for (let x = 0; x < y; x++){
-      [shape[x][y], shape[y][x]] = [shape[y][x], shape[x][y]]
+      [suggestedNewShape[x][y], suggestedNewShape[y][x]] = [suggestedNewShape[y][x], suggestedNewShape[x][y]]
     }
   }
-  if (!collision(currentPiece.x, currentPiece.y, shape)) {
-    currentPiece.shape = shape
+  if (!collision(currentPiece.x, currentPiece.y, suggestedNewShape)) {
+    currentPiece.shape = suggestedNewShape
+    currentPiece.orientation --
+  }else if (collision(currentPiece.x, currentPiece.y, suggestedNewShape)) {
+    let newOrientation = currentPiece.orientation - 1
+    let directionToRun = 1
+    console.log("Running srs checker")
+    SRSChecker(currentPiece.x, currentPiece.y, currentPiece.shape, suggestedNewShape, currentPiece.orientation, newOrientation, directionToRun)
   }
-  if (!collision(currentPiece.x, currentPiece.y+1, shape)){
+  if (!collision(currentPiece.x, currentPiece.y+1, suggestedNewShape)){
     landed = false
   }
   renderGameState()
 }
 
 function rotate180(){
-  let shape = [...currentPiece.shape.map((row) => [...row])]
+  let suggestedNewShape = [...currentPiece.shape.map((row) => [...row])]
   // Reverse order of rows
-  shape.reverse()
-  shape.forEach((row => row.reverse()))
-  if (!collision(currentPiece.x, currentPiece.y)) {
-    currentPiece.shape = shape
+  suggestedNewShape.reverse()
+  suggestedNewShape.forEach((row => row.reverse()))
+  if (!collision(currentPiece.x, currentPiece.y, suggestedNewShape)) {
+    currentPiece.shape = suggestedNewShape
+    console.log(modulo4(currentPiece.orientation))
+    currentPiece.orientation ++
+    console.log(modulo4(currentPiece.orientation))
+  }
+  if (!collision(currentPiece.x, currentPiece.y+1, suggestedNewShape)){
+    landed = false
   }
   renderGameState()
+}
+
+//===== Handle SRS kicktables =====
+function SRSChecker(x,y,oldShape, newShape, oldOrientation, newOrientation, direction){
+  // console.log(x)
+  // console.log(y)
+  // console.log(oldShape) //Before rotation, return if every test fails
+  // console.log(newShape) //After rotation
+  // console.log(oldOrientation)
+  // console.log(newOrientation)
+  if(currentPiece.index !== 1){
+    console.log("Running other piece srs")
+    if(direction == 0){
+      let rowToRun = modulo4(oldOrientation)
+      //Temporary, will revert if all test fails
+      srsTestLoop1:
+      for(i = 0; i < WALLKICKDATA[rowToRun].length; i++){
+        if(!collision(currentPiece.x+WALLKICKDATA[rowToRun][i][0], currentPiece.y+WALLKICKDATA[rowToRun][i][1], newShape)){
+          console.log("Test successful at row "+rowToRun+" test "+i)
+          currentPiece.shape = newShape
+          currentPiece.x = currentPiece.x+WALLKICKDATA[rowToRun][i][0]
+          currentPiece.y = currentPiece.y+WALLKICKDATA[rowToRun][i][1]
+          currentPiece.orientation ++
+          break srsTestLoop1;
+        }
+        console.log("None of the tests passed, piece remains where it is")
+      }
+    }else if(direction == 1){
+      let rowToRun = modulo4(oldOrientation)+4
+      console.log(newShape)
+      srsTestLoop2:
+      for(i = 0; i < WALLKICKDATA[rowToRun].length; i++){
+        if(!collision(currentPiece.x+WALLKICKDATA[rowToRun][i][0], currentPiece.y+WALLKICKDATA[rowToRun][i][1], newShape)){
+          console.log("Test successful at row "+rowToRun+" test "+i)
+          currentPiece.shape = newShape
+          currentPiece.x = currentPiece.x+WALLKICKDATA[rowToRun][i][0]
+          currentPiece.y = currentPiece.y+WALLKICKDATA[rowToRun][i][1]
+          currentPiece.orientation --
+          break srsTestLoop2;
+        }else{
+          console.log("Test failed for row "+ rowToRun+" test#" +i)
+        }
+        console.log("None of the tests passed, piece remains where it is")
+      }
+    }
+  }else if(currentPiece.index == 1){
+    console.log("Running I piece srs")
+    if(direction == 0){
+      let rowToRun = modulo4(oldOrientation)
+      //Temporary, will revert if all test fails
+      srsTestLoop1:
+      for(i = 0; i < IWALLKICKDATA[rowToRun].length; i++){
+        if(!collision(currentPiece.x+IWALLKICKDATA[rowToRun][i][0], currentPiece.y+IWALLKICKDATA[rowToRun][i][1], newShape)){
+          console.log("Test successful at row "+rowToRun+" test "+i)
+          currentPiece.shape = newShape
+          currentPiece.x = currentPiece.x+IWALLKICKDATA[rowToRun][i][0]
+          currentPiece.y = currentPiece.y+IWALLKICKDATA[rowToRun][i][1]
+          currentPiece.orientation ++
+          break srsTestLoop1;
+        }
+        console.log("None of the tests passed, piece remains where it is")
+      }
+    }else if(direction == 1){
+      let rowToRun = modulo4(oldOrientation)+4
+      console.log(newShape)
+      srsTestLoop2:
+      for(i = 0; i < IWALLKICKDATA[rowToRun].length; i++){
+        if(!collision(currentPiece.x+IWALLKICKDATA[rowToRun][i][0], currentPiece.y+IWALLKICKDATA[rowToRun][i][1], newShape)){
+          console.log("Test successful at row "+rowToRun+" test "+i)
+          currentPiece.shape = newShape
+          currentPiece.x = currentPiece.x+IWALLKICKDATA[rowToRun][i][0]
+          currentPiece.y = currentPiece.y+IWALLKICKDATA[rowToRun][i][1]
+          currentPiece.orientation --
+          break srsTestLoop2;
+        }else{
+          console.log("Test failed for row "+ rowToRun+" test#" +i)
+        }
+        console.log("None of the tests passed, piece remains where it is")
+      }
+    }
+  }
+  //DO EVERYTHING AGAIN FOR I PIECE
 }
 
 //===== What to run when keyup =====
@@ -403,6 +507,7 @@ class Piece {
     this.x = 3
     this.fromHoldQueue = false
     this.index = 0;
+    this.orientation = 0;
   }
 
 
