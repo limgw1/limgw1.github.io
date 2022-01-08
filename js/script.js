@@ -222,7 +222,6 @@ onkeydown = function(e){
     e.preventDefault()
     controlsMap[e.key] = e.type == 'keydown'
     if(controlsMap[controls.moveLeft] && timeStartOfLeftDAS == false){
-      console.log("Keydown Detected for left")
       timeStartOfLeftDAS = Date.now()
       timeStartOfDAS = Date.now()
       lastActivatedDirection = "L"
@@ -234,7 +233,6 @@ onkeydown = function(e){
       timeStartOfDAS = Date.now()
       lastActivatedDirection = "R"
       mainMoveFunction(lastActivatedDirection)
-      console.log("Keydown Detected for right")
       dirKeyPressed ++
     }
     if(controlsMap[controls.hold] == true){
@@ -244,12 +242,14 @@ onkeydown = function(e){
       if(!repeatBlockerClockwise){
         repeatBlockerClockwise = true
         rotateClockwise(currentPiece)
+        lockDelayTest()
       }
     }
     if(controlsMap[controls.rotateCounterclockwise] == true){
       if(!repeatBlockerCounterclockwise){
         repeatBlockerCounterclockwise = true
         rotateCounterClockwise(currentPiece)
+        lockDelayTest()
       }
     }
     if(controlsMap[controls.rotate180] == true){
@@ -263,7 +263,6 @@ onkeydown = function(e){
       mainSoftDropFunction(e, currentPiece)
     }
     if(controlsMap[controls.hardDrop] == true){
-      console.log("Hard drop")
       if (!hardDropRepeatBlocker){
         hardDropRepeatBlocker = true
         hardDrop(currentPiece)
@@ -291,11 +290,9 @@ document.addEventListener("keyup", (e)=> {
       if(dirKeyPressed == 0){
         for(i=0;i<9999;i++){
           if (i == moveInterval){
-            console.log("Interval cleared")
             clearInterval(i)
           }
         }
-        console.log("Setting ispressedDown and dascharged to false")
         isPressedDown = false
         dasCharged = false
       }
@@ -309,11 +306,9 @@ document.addEventListener("keyup", (e)=> {
       if(dirKeyPressed == 0){
         for(i=0;i<9999;i++){
           if (i == moveInterval){
-            console.log("Interval cleared")
             clearInterval(i)
           }
         }
-        console.log("Setting ispressedDown and dascharged to false")
         isPressedDown = false
         dasCharged = false
       }

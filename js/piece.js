@@ -26,7 +26,7 @@ function modulo4(pos){return(((pos%4)+4)%4)}
 function checkSpawn(x, y, candidate=null){
   const shape =  candidate || currentPiece.shape
   const n = shape.length
-  if (collision(currentPiece.x, currentPiece.y+1,)){
+  if (collision(currentPiece.x, currentPiece.y+1)){
     lockDelayTest(x, y)
   }
   for (let i = 0; i < n; i++){ //Checks every block in the tetromino matrix
@@ -149,7 +149,6 @@ function mainMoveFunction(){
     isPressedDown = true
     moveInterval = setInterval(() => {move()},5)
   }else if(dirKeyPressed !== 0){
-    console.log("mainmovefunction called when dirkeypress not 0")
     timeStartOfDAS = Date.now()
     multipleKeyPressTranslate()
   }else if(holded){
@@ -164,7 +163,6 @@ function mainMoveFunction(){
 }
 
 function move(){
-  console.log(dasCharged)
   if((Date.now()-timeStartOfDAS) >= settingsDAS){
     dasCharged = true
   }else{
@@ -181,7 +179,6 @@ function move(){
 function multipleKeyPressTranslate(){
   if (lastActivatedDirection == "R" && dirKeyPressed >= 1) {
     //move right
-    console.log("MultipleKeypressTranslate move right")
     if (!collision(currentPiece.x+1, currentPiece.y)){
       currentPiece.x += 1
       landed = false
@@ -189,7 +186,6 @@ function multipleKeyPressTranslate(){
     }
   }else if (lastActivatedDirection == "L" && dirKeyPressed >= 1){
     //move left
-    console.log("MultipleKeypressTranslate move left")
     if (!collision(currentPiece.x-1, currentPiece.y)){
       currentPiece.x -= 1
       landed = false
@@ -200,8 +196,6 @@ function multipleKeyPressTranslate(){
 }
 
 function translate(){
-  // console.log(direction)
-  // console.log(dasCharged)
   if (lastActivatedDirection == "R" && settingsARR == 0 && dasCharged) {
     //move all the way right
     while(!collision(currentPiece.x+1, currentPiece.y)){
@@ -243,9 +237,9 @@ function translate(){
 function lockDelayTest(x,y){
   const shape = currentPiece.shape
   const n = shape.length
-  loop1:
+  mainLoop:
   for (let i = 0; i < n; i++){ //Checks every block in the tetromino matrix
-    loop2:
+    innerLoop:
     for (let j = 0; j < n; j++){
       if (shape[i][j] > 0){  //If not empty block in the tetromino matrix
         let p = x + j
@@ -253,11 +247,13 @@ function lockDelayTest(x,y){
         if (p >= 0 && p < COLS && q < ROWS){
           if (grid[q][p] > 0){
             landed = true
-            break loop1;
+            waitingForLockDelay = false
+            break mainLoop;
           }
         }else if(q >= ROWS){
           landed = true
-          break loop1;
+          waitingForLockDelay = false
+          break mainLoop;
         }else{
           landed = false
           waitingForLockDelay = false
@@ -316,7 +312,7 @@ function lockPiece(){
   }
 }
 
-//=====Handle rotation======
+//=====Handling rotation======
 function rotateClockwise(){
   let suggestedNewShape = [...currentPiece.shape.map((row) => [...row])]
   // Transpose Matrix (basically rotation)
@@ -334,7 +330,6 @@ function rotateClockwise(){
     //SRS CHECK CODE HERE
     let newOrientation = currentPiece.orientation + 1
     let directionToRun = 0
-    console.log("Running srs checker")
     SRSChecker(currentPiece.x, currentPiece.y, currentPiece.shape, suggestedNewShape, currentPiece.orientation, newOrientation, directionToRun)
   }
   if (!collision(currentPiece.x, currentPiece.y+1, suggestedNewShape)){
@@ -359,7 +354,6 @@ function rotateCounterClockwise(){
   }else if (collision(currentPiece.x, currentPiece.y, suggestedNewShape)) {
     let newOrientation = currentPiece.orientation - 1
     let directionToRun = 1
-    console.log("Running srs checker")
     SRSChecker(currentPiece.x, currentPiece.y, currentPiece.shape, suggestedNewShape, currentPiece.orientation, newOrientation, directionToRun)
   }
   if (!collision(currentPiece.x, currentPiece.y+1, suggestedNewShape)){
@@ -375,9 +369,7 @@ function rotate180(){
   suggestedNewShape.forEach((row => row.reverse()))
   if (!collision(currentPiece.x, currentPiece.y, suggestedNewShape)) {
     currentPiece.shape = suggestedNewShape
-    console.log(modulo4(currentPiece.orientation))
     currentPiece.orientation ++
-    console.log(modulo4(currentPiece.orientation))
   }
   if (!collision(currentPiece.x, currentPiece.y+1, suggestedNewShape)){
     landed = false
@@ -388,14 +380,12 @@ function rotate180(){
 //===== Handle SRS kicktables =====
 function SRSChecker(x,y,oldShape, newShape, oldOrientation, newOrientation, direction){
   if(currentPiece.index !== 1){
-    console.log("Running other piece srs")
     if(direction == 0){
       let rowToRun = modulo4(oldOrientation)
       //Temporary, will revert if all test fails
       srsTestLoop1:
       for(i = 0; i < WALLKICKDATA[rowToRun].length; i++){
         if(!collision(currentPiece.x+WALLKICKDATA[rowToRun][i][0], currentPiece.y+WALLKICKDATA[rowToRun][i][1], newShape)){
-          console.log("Test successful at row "+rowToRun+" test "+i)
           currentPiece.shape = newShape
           currentPiece.x = currentPiece.x+WALLKICKDATA[rowToRun][i][0]
           currentPiece.y = currentPiece.y+WALLKICKDATA[rowToRun][i][1]
@@ -406,31 +396,26 @@ function SRSChecker(x,y,oldShape, newShape, oldOrientation, newOrientation, dire
       }
     }else if(direction == 1){
       let rowToRun = modulo4(oldOrientation)+4
-      console.log(newShape)
       srsTestLoop2:
       for(i = 0; i < WALLKICKDATA[rowToRun].length; i++){
         if(!collision(currentPiece.x+WALLKICKDATA[rowToRun][i][0], currentPiece.y+WALLKICKDATA[rowToRun][i][1], newShape)){
-          console.log("Test successful at row "+rowToRun+" test "+i)
           currentPiece.shape = newShape
           currentPiece.x = currentPiece.x+WALLKICKDATA[rowToRun][i][0]
           currentPiece.y = currentPiece.y+WALLKICKDATA[rowToRun][i][1]
           currentPiece.orientation --
           break srsTestLoop2;
         }else{
-          console.log("Test failed for row "+ rowToRun+" test#" +i)
         }
         console.log("None of the tests passed, piece remains where it is")
       }
     }
   }else if(currentPiece.index == 1){
-    console.log("Running I piece srs")
     if(direction == 0){
       let rowToRun = modulo4(oldOrientation)
       //Temporary, will revert if all test fails
       srsTestLoop1:
       for(i = 0; i < IWALLKICKDATA[rowToRun].length; i++){
         if(!collision(currentPiece.x+IWALLKICKDATA[rowToRun][i][0], currentPiece.y+IWALLKICKDATA[rowToRun][i][1], newShape)){
-          console.log("Test successful at row "+rowToRun+" test "+i)
           currentPiece.shape = newShape
           currentPiece.x = currentPiece.x+IWALLKICKDATA[rowToRun][i][0]
           currentPiece.y = currentPiece.y+IWALLKICKDATA[rowToRun][i][1]
@@ -441,18 +426,15 @@ function SRSChecker(x,y,oldShape, newShape, oldOrientation, newOrientation, dire
       }
     }else if(direction == 1){
       let rowToRun = modulo4(oldOrientation)+4
-      console.log(newShape)
       srsTestLoop2:
       for(i = 0; i < IWALLKICKDATA[rowToRun].length; i++){
         if(!collision(currentPiece.x+IWALLKICKDATA[rowToRun][i][0], currentPiece.y+IWALLKICKDATA[rowToRun][i][1], newShape)){
-          console.log("Test successful at row "+rowToRun+" test "+i)
           currentPiece.shape = newShape
           currentPiece.x = currentPiece.x+IWALLKICKDATA[rowToRun][i][0]
           currentPiece.y = currentPiece.y+IWALLKICKDATA[rowToRun][i][1]
           currentPiece.orientation --
           break srsTestLoop2;
         }else{
-          console.log("Test failed for row "+ rowToRun+" test#" +i)
         }
         console.log("None of the tests passed, piece remains where it is")
       }
