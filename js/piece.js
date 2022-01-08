@@ -247,12 +247,10 @@ function lockDelayTest(x,y){
         if (p >= 0 && p < COLS && q < ROWS){
           if (grid[q][p] > 0){
             landed = true
-            waitingForLockDelay = false
             break mainLoop;
           }
         }else if(q >= ROWS){
           landed = true
-          waitingForLockDelay = false
           break mainLoop;
         }else{
           landed = false
@@ -265,7 +263,6 @@ function lockDelayTest(x,y){
     waitingForLockDelay = true
     lockDelayCountdown()
   }
-  return false
 }
 
 function lockDelayCountdown(){
