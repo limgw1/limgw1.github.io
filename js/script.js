@@ -108,6 +108,7 @@ let renderGameState = () => {
   if (currentPiece !== null){
     currentPiece.renderPiece()
   }
+  currentPiece.renderGhost()
 }
 
 

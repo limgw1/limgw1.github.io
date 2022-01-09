@@ -498,6 +498,28 @@ class Piece {
     })
   }
 
+  renderGhost(){
+    let x = this.x
+    let y = this.y
+    while(!this.collision(x, y+1)){
+      if (this.collision(x, y+1)){
+      break
+      }else{
+        y += 1
+      }
+    }
+    this.shape.map((row, i) => {
+      row.map((cell, j) => {
+        if (cell > 0){ //Fills grid with color if not supposed to be empty(not 0)
+          this.context.fillStyle = COLORS[cell+8]
+          this.context.fillRect(x + j, y + i, 1, 1)
+        }
+      })
+    })
+  }
+
+
+
   //Collision detection
   //Given an x and y value, determine if a piece has collided with another object or sides of the map
   //Returns true if there is collision, which causes other functions to not work
