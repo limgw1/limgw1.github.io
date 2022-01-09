@@ -27,7 +27,7 @@ class QueueModel {
       }
     }
     //TODO: Render the queue piece
-    for (let i = 0; i < this.queueArray.length; i++){
+    for (let i = 0; i < this.queueArray.length-1; i++){
       this.queueArray[i+1].renderQueuePiece(i)
     }
 
