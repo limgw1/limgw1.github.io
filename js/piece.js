@@ -89,7 +89,7 @@ function mainSoftDropFunction(e){
   if (controlsMap[controls.softDrop] == true){
     moveDown()
     timeStartOfSDRR = Date.now()
-    softDropInterval()
+    softDropInterval
   }
 }
 
@@ -235,6 +235,7 @@ function translate(){
 
 //=====Handling lock delay test=====
 function lockDelayTest(x,y){
+
   const shape = currentPiece.shape
   const n = shape.length
   mainLoop:
@@ -261,6 +262,11 @@ function lockDelayTest(x,y){
   }
   if (landed && !waitingForLockDelay){
     waitingForLockDelay = true
+    for(i=0;i<9999;i++){
+      if (i !== timeInterval && i !== softDropInterval && i !== moveInterval){
+        clearInterval(i)
+      }
+    }
     lockDelayCountdown()
   }
 }
