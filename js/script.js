@@ -13,6 +13,7 @@ boardContext.scale(PIECE_WIDTH, PIECE_WIDTH)
 queueContext.scale(PIECE_WIDTH, PIECE_WIDTH)
 holdContext.scale(PIECE_WIDTH, PIECE_WIDTH)
 
+
 //Variable for control
 let controlsMap = {}
 let currentlyMoving = null
@@ -27,7 +28,7 @@ let repeatBlocker180 = false
 
 //Variables for the board
 let grid = []
-let stage = 0 //Stage 0 for unrendered game, Stage 1 for active game, Stage 2 for finished game, Stage 3 for paused game, Stage 4 for controls
+let stage = "before" //Before, During, Death, Over
 
 //Variables for the display
 let linesLeft = 40
@@ -62,6 +63,7 @@ let makeStartingGrid = () => {
 
 //Start of code for rendering a new game state
 let newGameState = () => {
+
   clearLine()
   if (currentPiece === null){
     gameBag.shift()
@@ -92,18 +94,12 @@ let newGameState = () => {
 //End of code
 
 //Renders code for Active Game State and falling piece
-let renderGameState = () => {
+function renderGameState(){
   //Renders the board
   if (!linesLeft <= 0){
     checkSpawn(currentPiece.x, currentPiece.y)
   }
-  for (let i = 0; i < grid.length; i++){
-    for (let j = 0; j < grid[i].length; j++){
-      let cell = grid[i][j]
-      boardContext.fillStyle = COLORS[cell]
-      boardContext.fillRect(j, i, 1, 1)
-    }
-  }
+  paintBoard()
   //Renders falling piece
   if (currentPiece !== null){
     currentPiece.renderPiece()
@@ -111,6 +107,23 @@ let renderGameState = () => {
   currentPiece.renderGhost()
 }
 
+function paintBoard(){
+  for (let i = 0; i < grid.length; i++){
+    for (let j = 0; j < grid[i].length; j++){
+      let cell = grid[i][j]
+      boardContext.fillStyle = COLORS[cell]
+      boardContext.fillRect(j, i, 1, 1)
+    }
+  }
+  boardContext.strokeStyle = 'red';
+  boardContext.lineWidth = 0.1;
+
+  // draw a red line
+  boardContext.beginPath();
+  boardContext.moveTo(0, 2);
+  boardContext.lineTo(10, 2);
+  boardContext.stroke();
+}
 
 //Start of code for 7 bag
 function shuffle() {
@@ -151,7 +164,7 @@ const clearLine = () => {
     }
   }
   if (linesLeft <= 0){
-    stage = 2
+    stage = "over"
     renderGameState()
   }
 }
@@ -189,22 +202,25 @@ let sleep = (ms) => {
   return new Promise(resolve=>setTimeout(resolve,ms))
 }
 async function startGame(){
-  endGame()
+  endGame() //Need this incase its restart and not end game
   document.getElementById("action-text").textContent = "Ready?"
   await sleep(500);
   document.getElementById("action-text").textContent = "GO!"
   await sleep(500);
-  stage = 1
+  stage = "during"
   newGameState()
   renderGameState()
 }
 
 //Start of code for displaying the timer
 let timeInterval = setInterval(() => {
-  if(stage == 1){
+  if(stage == "during"){
     updateTimer()
-  }else if(stage == 2){
+  }else if(stage == "over"){
     alert("Game over, final time is: " + rawTimer/100)
+    endGame()
+  }else if(stage == "death"){
+    alert("You topped out")
     endGame()
   }
 }, 10);
@@ -220,7 +236,7 @@ function updateTimer(){
 
 //Code for controls
 onkeydown = function(e){
-  if (stage == 0 || stage == 1){
+  if (stage == "before" || stage == "during"){
     e.preventDefault()
     controlsMap[e.key] = e.type == 'keydown'
     if(controlsMap[controls.moveLeft] && timeStartOfLeftDAS == false){
@@ -336,7 +352,7 @@ document.addEventListener("keyup", (e)=> {
 })
 
 function endGame(){
-  stage = 0;
+  stage = "before";
   boardContext.clearRect(0,0, ROWS*PIECE_WIDTH, COLS*PIECE_WIDTH)
   queueContext.clearRect(0,0, QUEUEROWS*PIECE_WIDTH, QUEUECOLS*PIECE_WIDTH)
   holdContext.clearRect(0,0, HOLDROWS*PIECE_WIDTH, HOLDCOLS*PIECE_WIDTH)

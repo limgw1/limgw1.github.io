@@ -1,5 +1,4 @@
-//=================For testing purposes ==================//
-//Required variables
+//=====Required variables=====//
 settingsDAS = tuning['delayedAutoShift']
 settingsARR = tuning['automaticRepeatRate']
 settingsSDRR = tuning['softDropRepeatRate']
@@ -14,7 +13,7 @@ timeStartOfSDRR = 0;
 moveInterval = null;
 softDropInterval = null;
 lockDelayTimeout = null;
-//Vars for lock delay
+//=====Vars for lock delay=====//
 landed = false;
 lockDelay = 0;
 waitingForLockDelay = false;
@@ -22,26 +21,49 @@ waitingForLockDelay = false;
 //=====For orientation math=====//
 function modulo4(pos){return(((pos%4)+4)%4)}
 
-//=====Handling spawn check=====
+//=====Handling spawn check=====//
 function checkSpawn(x, y, candidate=null){
   const shape =  candidate || currentPiece.shape
   const n = shape.length
   if (collision(currentPiece.x, currentPiece.y+1)){
+    console.log("Lock delay test")
     lockDelayTest(x, y)
   }
+  jstrisTopOutCheck1()
+}
+//=====Topout check=====
+function jstrisTopOutCheck1(candidate=null){
+  const shape =  candidate || currentPiece.shape
+  const n = shape.length
   for (let i = 0; i < n; i++){ //Checks every block in the tetromino matrix
     for (let j = 0; j < n; j++){
       if (shape[i][j] > 0){
-        if (grid[i][j] > 0){
-          alert("Game over!")
-          stage = 0
-          endGame()
+        if (grid[currentPiece.y+i][currentPiece.x+j] > 0){
+          jstrisTopOutCheck2()
+        }
+      }
+    }
+  }
+}
+
+function jstrisTopOutCheck2(candidate=null){
+  const shape =  candidate || currentPiece.shape
+  const n = shape.length
+  currentPiece.y = 0
+  for (let i = 0; i < n; i++){ //Checks every block in the tetromino matrix
+    for (let j = 0; j < n; j++){
+      if (shape[i][j] > 0){
+        if (grid[currentPiece.y+i][currentPiece.x+j] > 0){
+          // console.log(`topped out at ${currentPiece.y+i}, ${currentPiece.x+j}`)
+          paintBoard()
+          stage = "death"
           break
         }
       }
     }
   }
 }
+
 //=====Handling hard drop=====
 function hardDrop(){
   //CHANGE  CODE IF THERE IS ANOTHER TIMEOUT IN THE FUTURE
@@ -204,6 +226,10 @@ function translate(){
         currentPiece.x += 1
       }
     }
+    if (!collision(currentPiece.x, currentPiece.y+1)){
+      landed = false
+      waitingForLockDelay = false
+    }
   }else if (lastActivatedDirection == "L" && settingsARR == 0 && dasCharged){
     //move all the way left
     while(!collision(currentPiece.x-1, currentPiece.y)){
@@ -211,6 +237,10 @@ function translate(){
       }else{
         currentPiece.x -= 1
       }
+    }
+    if (!collision(currentPiece.x, currentPiece.y+1)){
+      landed = false
+      waitingForLockDelay = false
     }
   }else if (lastActivatedDirection == "R") {
     //move right
@@ -484,7 +514,7 @@ class Piece {
   constructor(shape, context){
     this.shape = shape
     this.context = context
-    this.y = 0 //TODO: I think need to change this for guideline, pieces spawn at 21/22
+    this.y = 1 //Spawns at row 21 for jstris and row 23 for tetrio. Will implement jstris first
     this.x = 3
     this.fromHoldQueue = false
     this.index = 0;
@@ -608,9 +638,9 @@ class Piece {
         })
       holded = false
       })
-      if (this.y === 0){
+      if (this.y == 1 ){
         alert("Game over!")
-        stage = 0
+        stage = "over"
       }
       currentPiece = null
       pieceCount ++
